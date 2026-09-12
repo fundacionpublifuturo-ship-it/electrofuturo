@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Portal administrativo — Electro Futuro</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%2319C1D6'/><path d='M56 14 30 56h16l-4 30 28-44H54z' fill='white'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/portales.css">
+</head>
+<body>
+
+<!-- ==================== INGRESO ==================== -->
+<div class="acceso" id="acceso">
+  <div class="acceso-caja">
+    <img src="assets/img/marca/logo-nav.webp" alt="Electro Futuro">
+    <h1>Portal administrativo</h1>
+    <p>Entra con el perfil que te corresponde. Cada perfil ve una plataforma distinta.</p>
+    <div class="acceso-error" id="acceso-error"></div>
+    <div class="campo">
+      <label for="u">Usuario</label>
+      <input type="text" id="u" autocomplete="username" autocapitalize="off" spellcheck="false">
+    </div>
+    <div class="campo">
+      <label for="c">Contraseña</label>
+      <input type="password" id="c" autocomplete="current-password">
+    </div>
+    <button class="btn btn-p" id="entrar" style="width:100%;padding:12px">Entrar</button>
+    <div class="pistas">
+      Perfiles: <code>c0m3rc14l</code> · <code>g3r3nc14</code> · <code>b0d3g4</code><br>
+      La contraseña es igual al usuario.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== APLICACIÓN ==================== -->
+<div class="app" id="app">
+  <aside class="lateral">
+    <div class="lateral-marca">
+      <img src="assets/img/marca/logo-nav.webp" alt="Electro Futuro">
+      <span>Portal administrativo</span>
+    </div>
+    <nav class="menu" id="menu"></nav>
+    <div class="lateral-pie">
+      <b id="s-nombre">—</b>
+      <small id="s-rol">—</small>
+      <button id="salir">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <main class="principal">
+    <header class="barra">
+      <div>
+        <h1 id="titulo">Inicio</h1>
+        <p id="subtitulo">Resumen del día</p>
+      </div>
+      <div class="barra-acciones" id="acciones"></div>
+    </header>
+    <div class="contenido">
+
+      <!-- INICIO -->
+      <section class="vista activa" id="v-inicio">
+        <div class="cifras" id="tablero"></div>
+        <div class="tarjeta">
+          <div class="tarjeta-cab"><div><h3>Alertas de stock</h3>
+            <p>Referencias en el mínimo o por debajo</p></div></div>
+          <div class="tarjeta-cuerpo pegado tabla-cont" id="tabla-alertas"></div>
+        </div>
+        <div class="tarjeta">
+          <div class="tarjeta-cab"><div><h3>Últimos pedidos</h3>
+            <p>Los diez más recientes</p></div>
+            <button class="btn btn-l btn-x" data-ir="pedidos">Ver todos</button></div>
+          <div class="tarjeta-cuerpo pegado tabla-cont" id="tabla-ultimos"></div>
+        </div>
+      </section>
+
+      <!-- PEDIDOS -->
+      <section class="vista" id="v-pedidos">
+        <div class="filtros-fila">
+          <input type="text" class="busca" id="q-pedidos" placeholder="Buscar por código, cliente o teléfono">
+          <select id="f-estado" style="max-width:210px"><option value="">Todos los estados</option></select>
+          <select id="f-entrega" style="max-width:180px">
+            <option value="">Recoger y envío</option>
+            <option value="recoger">Solo recoger</option>
+            <option value="envio">Solo envío</option>
+          </select>
+        </div>
+        <div class="tarjeta"><div class="tarjeta-cuerpo pegado tabla-cont" id="tabla-pedidos"></div></div>
+      </section>
+
+      <!-- CLIENTES -->
+      <section class="vista" id="v-clientes">
+        <div class="filtros-fila">
+          <input type="text" class="busca" id="q-clientes" placeholder="Buscar por nombre, teléfono o documento">
+          <button class="btn btn-p btn-x" id="nuevo-cliente">Nuevo cliente</button>
+        </div>
+        <div class="tarjeta"><div class="tarjeta-cuerpo pegado tabla-cont" id="tabla-clientes"></div></div>
+      </section>
+
+      <!-- INVENTARIO -->
+      <section class="vista" id="v-inventario">
+        <div class="aviso info" id="aviso-inventario"></div>
+        <div class="filtros-fila">
+          <input type="text" class="busca" id="q-inv" placeholder="Buscar por SKU, nombre o marca">
+          <select id="f-cat-inv" style="max-width:190px"><option value="">Todas las categorías</option></select>
+          <select id="f-inv" style="max-width:200px">
+            <option value="">Todo el catálogo</option>
+            <option value="alta">Con inventario</option>
+            <option value="sin">Sin dar de alta</option>
+            <option value="bajo">Bajo el mínimo</option>
+          </select>
+          <button class="btn btn-l btn-x" id="kardex-todo">Ver kardex</button>
+          <button class="btn btn-l btn-x" id="importar-inv">Cargar desde CSV</button>
+          <input type="file" id="archivo-csv" accept=".csv,text/csv" hidden>
+        </div>
+        <div class="tarjeta"><div class="tarjeta-cuerpo pegado tabla-cont" id="tabla-inv"></div></div>
+      </section>
+
+      <!-- CARTERA -->
+      <section class="vista" id="v-cartera">
+        <div class="cifras" id="cifras-cartera"></div>
+        <div class="tarjeta">
+          <div class="tarjeta-cab"><div><h3>Cuentas por cobrar</h3>
+            <p>Pedidos entregados o en curso sin pago confirmado</p></div></div>
+          <div class="tarjeta-cuerpo pegado tabla-cont" id="tabla-cartera"></div>
+        </div>
+      </section>
+
+      <!-- FINANZAS -->
+      <section class="vista" id="v-finanzas">
+        <div class="cifras" id="cifras-finanzas"></div>
+        <div class="tarjeta">
+          <div class="tarjeta-cab">
+            <div><h3>Movimientos de caja</h3><p>Ingresos y egresos registrados</p></div>
+            <button class="btn btn-p btn-x" id="nuevo-mov">Registrar movimiento</button>
+          </div>
+          <div class="tarjeta-cuerpo pegado tabla-cont" id="tabla-caja"></div>
+        </div>
+        <div class="tarjeta">
+          <div class="tarjeta-cab"><div><h3>Rentabilidad por pedido</h3>
+            <p>Venta menos costo de la mercancía. Solo aparecen los pedidos cuyos SKU tienen costo cargado.</p></div></div>
+          <div class="tarjeta-cuerpo pegado tabla-cont" id="tabla-margen"></div>
+        </div>
+      </section>
+
+      <!-- GARANTÍAS -->
+      <section class="vista" id="v-garantias">
+        <div class="tarjeta"><div class="tarjeta-cuerpo pegado tabla-cont" id="tabla-garantias"></div></div>
+      </section>
+
+      <!-- AJUSTES -->
+      <section class="vista" id="v-ajustes">
+        <div class="aviso alerta">
+          Los datos viven en este navegador. Para que el portal se vea igual en el
+          celular y en el computador del local hay que conectar Supabase con el
+          esquema de <b>supabase/schema.sql</b>. Mientras tanto, descarga el respaldo
+          antes de cambiar de equipo.
+        </div>
+        <div class="tarjeta">
+          <div class="tarjeta-cab"><div><h3>Datos de la plataforma</h3>
+            <p>Respaldo, restauración y arranque</p></div></div>
+          <div class="tarjeta-cuerpo">
+            <div class="barra-acciones">
+              <button class="btn btn-l" id="exportar">Descargar respaldo</button>
+              <button class="btn btn-l" id="restaurar">Restaurar respaldo</button>
+              <input type="file" id="archivo-json" accept=".json,application/json" hidden>
+              <button class="btn btn-l" id="demo">Cargar datos de demostración</button>
+              <button class="btn btn-d" id="vaciar">Vaciar todos los datos</button>
+            </div>
+          </div>
+        </div>
+        <div class="tarjeta">
+          <div class="tarjeta-cab"><div><h3>Auditoría</h3>
+            <p>Quién cambió qué y cuándo</p></div></div>
+          <div class="tarjeta-cuerpo pegado tabla-cont" id="tabla-auditoria"></div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- ==================== PANEL DE DETALLE ==================== -->
+<div class="velo" id="velo"></div>
+<aside class="panel" id="panel" aria-label="Detalle">
+  <div class="panel-cab">
+    <div><h3 id="panel-titulo">Detalle</h3><p id="panel-sub"></p></div>
+    <button class="cerrar-x" id="panel-cerrar" aria-label="Cerrar">×</button>
+  </div>
+  <div class="panel-cuerpo" id="panel-cuerpo"></div>
+  <div class="panel-pie" id="panel-pie"></div>
+</aside>
+
+<div class="aviso-flotante" id="aviso-flotante"></div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/datos.js"></script>
+<script src="assets/js/admin.js"></script>
+</body>
+</html>

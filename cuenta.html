@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mi cuenta — Electro Futuro</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%2319C1D6'/><path d='M56 14 30 56h16l-4 30 28-44H54z' fill='white'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/portales.css">
+</head>
+<body>
+
+<!-- ==================== INGRESO ==================== -->
+<div class="acceso" id="acceso">
+  <div class="acceso-caja">
+    <img src="assets/img/marca/logo-nav.webp" alt="Electro Futuro">
+    <h1>Mi cuenta</h1>
+    <p>Entra con el WhatsApp que usaste al comprar y sigue tus pedidos.</p>
+    <div class="acceso-error" id="acceso-error"></div>
+    <div class="campo">
+      <label for="tel">Tu número de WhatsApp</label>
+      <input type="text" id="tel" inputmode="numeric" placeholder="3001234567" autocomplete="tel">
+    </div>
+    <button class="btn btn-p" id="entrar" style="width:100%;padding:12px">Entrar</button>
+
+    <div class="pistas">
+      <b style="color:var(--grafito);display:block;margin-bottom:8px">¿Solo quieres ver dónde va tu pedido?</b>
+      <div class="campo" style="margin-bottom:8px">
+        <input type="text" id="codigo" placeholder="Código del pedido, ej. EF-2026-00012">
+      </div>
+      <button class="btn btn-l" id="rastrear" style="width:100%">Rastrear sin entrar</button>
+      <p style="margin:14px 0 0">¿No aparece tu número? Escríbenos por
+        <a href="#" id="wa-ayuda" style="color:var(--cian-hondo);font-weight:600">WhatsApp</a>
+        y lo vinculamos.</p>
+      <p style="margin:10px 0 0"><a href="index.html" style="color:var(--cian-hondo);font-weight:600">Volver a la tienda</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CUENTA ==================== -->
+<div id="cuenta" style="display:none">
+  <header class="cliente-cab">
+    <a href="index.html"><img src="assets/img/marca/logo-nav.webp" alt="Electro Futuro"></a>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span style="font-size:.83rem;color:var(--gris)" id="c-saludo"></span>
+      <button class="btn btn-l btn-x" id="salir">Salir</button>
+    </div>
+  </header>
+
+  <div class="cliente-wrap">
+    <div class="cifras" id="c-cifras"></div>
+
+    <div class="pestanas">
+      <button class="activo" data-tab="pedidos">Mis pedidos</button>
+      <button data-tab="garantias">Garantías</button>
+      <button data-tab="datos">Mis datos</button>
+    </div>
+
+    <section class="vista activa" id="t-pedidos">
+      <div class="tarjeta"><div class="tarjeta-cuerpo pegado" id="lista-pedidos"></div></div>
+    </section>
+
+    <section class="vista" id="t-garantias">
+      <div class="tarjeta">
+        <div class="tarjeta-cab">
+          <div><h3>Mis garantías</h3><p>Casos que has radicado</p></div>
+          <button class="btn btn-p btn-x" id="nueva-garantia">Radicar garantía</button>
+        </div>
+        <div class="tarjeta-cuerpo pegado" id="lista-garantias"></div>
+      </div>
+    </section>
+
+    <section class="vista" id="t-datos">
+      <div class="tarjeta">
+        <div class="tarjeta-cab"><div><h3>Mis datos</h3>
+          <p>Los usamos para despacharte y contactarte</p></div></div>
+        <div class="tarjeta-cuerpo">
+          <div class="campo"><label>Nombre o negocio</label><input type="text" id="d-nombre"></div>
+          <div class="rejilla">
+            <div class="campo"><label>WhatsApp</label><input type="text" id="d-tel" disabled></div>
+            <div class="campo"><label>Correo</label><input type="text" id="d-correo"></div>
+          </div>
+          <div class="rejilla">
+            <div class="campo"><label>Ciudad</label><input type="text" id="d-ciudad"></div>
+            <div class="campo"><label>Documento</label><input type="text" id="d-doc"></div>
+          </div>
+          <div class="campo"><label>Dirección de entrega</label><input type="text" id="d-dir"></div>
+          <button class="btn btn-p" id="guardar-datos">Guardar cambios</button>
+        </div>
+      </div>
+      <div class="tarjeta">
+        <div class="tarjeta-cab"><div><h3>Tratamiento de datos</h3>
+          <p>Qué autorizaste y cómo pedir que lo borremos</p></div></div>
+        <div class="tarjeta-cuerpo">
+          <p style="font-size:.85rem;color:var(--gris);margin:0 0 14px" id="d-consent"></p>
+          <a class="btn btn-l" id="d-baja" target="_blank" rel="noopener">Pedir eliminación de mis datos</a>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ==================== PANEL ==================== -->
+<div class="velo" id="velo"></div>
+<aside class="panel" id="panel" aria-label="Detalle">
+  <div class="panel-cab">
+    <div><h3 id="panel-titulo">Detalle</h3><p id="panel-sub"></p></div>
+    <button class="cerrar-x" id="panel-cerrar" aria-label="Cerrar">×</button>
+  </div>
+  <div class="panel-cuerpo" id="panel-cuerpo"></div>
+  <div class="panel-pie" id="panel-pie"></div>
+</aside>
+
+<div class="aviso-flotante" id="aviso-flotante"></div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/datos.js"></script>
+<script src="assets/js/cuenta.js"></script>
+</body>
+</html>
