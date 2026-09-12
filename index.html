@@ -36,51 +36,42 @@
   </div>
 </div>
 <!-- ======================= NAV ======================= -->
-<nav class="nav">
-  <div class="wrap">
+<nav class="nav" id="nav">
+  <div class="nav-top">
     <a href="#top" class="logo" aria-label="Electrofuturo, inicio">
       <img src="assets/img/marca/logo-nav.webp" alt="Electrofuturo">
     </a>
-    <div class="nav-links">
-      <a href="#catalogo">Catálogo</a>
-      <a href="#cotizador">Cotizar</a>
-      <a href="#tecnica">Línea técnica</a>
-      <a href="#academy">Cursos</a>
-      <a href="#preguntas">Preguntas</a>
-      <a href="#ubicacion">Ubicación</a>
-    </div>
     <div class="nav-acciones">
       <a class="nav-ic nav-wa" href="#" data-wa target="_blank" rel="noopener"
-         aria-label="Escribir por WhatsApp" title="WhatsApp"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-11.9 7L4 20l1.1-3.9A8 8 0 1 1 20 12z"/><path d="M9 9.6c0 2.9 2.5 5.4 5.4 5.4"/></svg></a>
-      <a class="nav-admin" href="admin.html" title="Portal administrativo">
-        <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
-          stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 3 5 6v5.6c0 4.3 3 8.2 7 9.4 4-1.2 7-5.1 7-9.4V6z"/>
-          <path d="M12 11v3"/><circle cx="12" cy="9" r=".9" fill="currentColor"/></svg>
-        <span>Admin</span>
-      </a>
-      <a class="nav-ic" href="cuenta.html" aria-label="Mi cuenta" title="Mi cuenta"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.4"/><path d="M4.5 20c0-3.6 3.4-6 7.5-6s7.5 2.4 7.5 6"/></svg></a>
-      <button class="btn-carrito" id="abrir-pedido" aria-label="Ver mi pedido" title="Mi pedido">
-        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.1 10.6a1.8 1.8 0 0 0 1.8 1.4h7.6a1.8 1.8 0 0 0 1.8-1.5L20 7.5H6"/><circle cx="10" cy="20" r="1.2"/><circle cx="17" cy="20" r="1.2"/></svg>
+         aria-label="Escribir por WhatsApp" title="WhatsApp"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 0 1-11.9 7L4 20l1.1-3.9A8 8 0 1 1 20 12z"/><path d="M9 9.6c0 2.9 2.5 5.4 5.4 5.4"/></svg></a>
+      <a class="nav-ic" href="cuenta.html" aria-label="Mi cuenta" title="Mi cuenta y seguimiento"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8.5" r="3.4"/><path d="M4.5 20c0-3.6 3.4-6 7.5-6s7.5 2.4 7.5 6"/></svg></a>
+      <button class="nav-ic btn-carrito" id="abrir-pedido" aria-label="Ver mi pedido" title="Mi pedido">
+        <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2l2.1 10.6a1.8 1.8 0 0 0 1.8 1.4h7.6a1.8 1.8 0 0 0 1.8-1.5L20 7.5H6"/><circle cx="10" cy="20" r="1.2"/><circle cx="17" cy="20" r="1.2"/></svg>
         <span class="n" id="contador-pedido" style="display:none">0</span>
       </button>
-      <a href="#catalogo" class="btn btn-primario nav-cta">Ver catálogo</a>
-      <button class="nav-burger" id="nav-burger" aria-label="Abrir el menú" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
+      <a class="btn-admin" href="admin.html" title="Portal administrativo">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5.6c0 4.3 3 8.2 7 9.4 4-1.2 7-5.1 7-9.4V6z"/><path d="m9.4 12 1.9 1.9 3.5-3.6"/></svg>
+        <span>Portal admin</span>
+      </a>
     </div>
   </div>
-  <div class="nav-menu" id="nav-menu">
-    <a href="#catalogo">Catálogo</a>
-    <a href="#cotizador">Cotizar en 3 pasos</a>
-    <a href="#tecnica">Línea técnica</a>
-    <a href="#academy">Cursos</a>
-    <a href="#lista-precios">Lista de precios</a>
-    <a href="#preguntas">Preguntas frecuentes</a>
-    <a href="#ubicacion">Ubicación</a>
-    <a href="cuenta.html">Mi cuenta y seguimiento</a>
-    <a href="admin.html" class="menu-admin">Portal administrativo</a>
-    <a href="#" data-wa target="_blank" rel="noopener">Escribir por WhatsApp</a>
+  <div class="nav-pills" id="nav-pills" role="tablist" aria-label="Secciones">
+      <a class="pill-nav" href="#catalogo" data-sec="catalogo"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 12 4l9 4.5v7L12 20l-9-4.5z"/><path d="M3 8.5 12 13l9-4.5M12 13v7"/></svg><span>Catálogo</span></a>
+      <a class="pill-nav" href="#cotizador" data-sec="cotizador"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M9 7h6M9 11h6M9 15h3"/></svg><span>Cotizar</span></a>
+      <a class="pill-nav" href="#tecnica" data-sec="tecnica"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4.5a4 4 0 0 0-5.3 5.3L4 15v5h5l5.2-5.2a4 4 0 0 0 5.3-5.3l-2.8 2.8-2.2-2.2z"/></svg><span>Línea técnica</span></a>
+      <a class="pill-nav" href="#academy" data-sec="academy"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5 12 4.5l9 4-9 4z"/><path d="M7 11v5c0 1.4 2.2 2.5 5 2.5s5-1.1 5-2.5v-5"/></svg><span>Cursos</span></a>
+      <a class="pill-nav" href="#lista-precios" data-sec="lista-precios"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/><circle cx="19" cy="18" r="2"/></svg><span>Lista de precios</span></a>
+      <a class="pill-nav" href="#preguntas" data-sec="preguntas"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.3 2.4c-.6.2-.9.7-.9 1.3v.4"/><circle cx="12" cy="16.6" r=".9" fill="currentColor" stroke="none"/></svg><span>Preguntas</span></a>
+      <a class="pill-nav" href="#ubicacion" data-sec="ubicacion"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><span>Ubicación</span></a>
+  </div>
+  <div class="nav-puntos" id="nav-puntos" aria-hidden="true">
+      <span class="punto" data-punto="catalogo"></span>
+      <span class="punto" data-punto="cotizador"></span>
+      <span class="punto" data-punto="tecnica"></span>
+      <span class="punto" data-punto="academy"></span>
+      <span class="punto" data-punto="lista-precios"></span>
+      <span class="punto" data-punto="preguntas"></span>
+      <span class="punto" data-punto="ubicacion"></span>
   </div>
 </nav>
 <!-- ======================= HERO ======================= -->
