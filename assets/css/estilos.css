@@ -90,7 +90,10 @@ h1,h2,h3,h4{font-family:var(--display);margin:0;letter-spacing:-.032em;line-heig
 .anuncio.oculto{display:none}
 @media (max-width:560px){
   .anuncio .wrap{grid-template-columns:1fr 30px;padding:9px 14px 9px 16px;gap:8px}
-  .anuncio .centro-msj{justify-content:flex-start;text-align:left;font-size:.76rem}
+  .anuncio .centro-msj{grid-column:1 !important;justify-content:flex-start;text-align:left;
+    font-size:.75rem;line-height:1.45;min-width:0}
+  .anuncio .msj{display:inline;white-space:normal}
+  .anuncio a{margin-top:2px}
   .anuncio .cerrar{grid-column:2;align-self:start}
 }
 /* ---------- Nav ---------- */
@@ -1125,10 +1128,74 @@ body::before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opa
   /* Con dos botones lado a lado, "Comprar ahora" no cabe y empuja la página */
   .prod-acciones{grid-template-columns:1fr;gap:7px}
   .prod-acciones .add,.prod-acciones .comprar{white-space:normal;font-size:.76rem}
-  /* La banda de anuncio no envolvía y sacaba 40 px por el costado */
-  .anuncio .centro-msj,.anuncio .msj{flex-wrap:wrap;justify-content:center;text-align:center}
-  .anuncio .msj span,.anuncio .msj b{white-space:normal}
   .marcas{overflow:hidden}
-  .anuncio{overflow:hidden}
-  .anuncio .centro-msj{max-width:100%}
+}
+
+/* ============================================================
+   v8 — Barra superior rehecha
+   Antes: logo + lema + 6 enlaces + 3 botones en 72 px. "Línea técnica"
+   y "Mi cuenta" se partían en dos renglones y la barra se veía apretada.
+   Ahora: logo solo, enlaces en una sola línea sin quiebres, y las
+   acciones como iconos del mismo tamaño con un único botón principal.
+   ============================================================ */
+.nav .wrap{gap:14px;height:66px}
+.nav.desplazado{box-shadow:0 6px 22px rgba(27,33,38,.07)}
+.nav .logo{display:flex;align-items:center;flex:0 0 auto}
+.nav .logo img{height:25px;width:auto}
+.nav .logo .sep,.nav .logo .marca-txt{display:none}
+
+.nav-links{display:flex;align-items:center;gap:1px;margin-left:auto;font-size:.855rem;flex-wrap:nowrap}
+.nav-links a{color:var(--gris);padding:8px 11px;border-radius:100px;white-space:nowrap;
+  transition:color .2s var(--ease),background .2s var(--ease)}
+.nav-links a:hover{color:var(--tinta);background:var(--niebla)}
+
+.nav-acciones{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.nav-ic{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid var(--linea);background:#fff;color:var(--grafito);flex:0 0 40px;
+  transition:border-color .2s var(--ease),color .2s var(--ease),background .2s var(--ease),transform .2s var(--ease)}
+.nav-ic:hover{border-color:var(--cian);color:var(--cian-hondo);background:var(--cian-brisa);transform:translateY(-2px)}
+.nav-wa:hover{border-color:#25D366;color:#128C4A;background:#EAFBF1}
+.btn-carrito{width:40px;height:40px;flex:0 0 40px;font-size:0}
+.btn-carrito svg{width:19px;height:19px}
+.nav-cta{padding:10px 20px;font-size:.85rem;white-space:nowrap}
+
+/* Botón de menú de tres líneas, que se cruza al abrir */
+.nav-burger{display:none;width:40px;height:40px;flex:0 0 40px;border-radius:50%;
+  border:1px solid var(--linea);background:#fff;place-items:center;gap:4px;
+  flex-direction:column;justify-content:center}
+.nav-burger span{display:block;width:16px;height:1.8px;background:var(--grafito);border-radius:2px;
+  transition:transform .25s var(--ease),opacity .2s}
+.nav-burger.abierto span:nth-child(1){transform:translateY(5.8px) rotate(45deg)}
+.nav-burger.abierto span:nth-child(2){opacity:0}
+.nav-burger.abierto span:nth-child(3){transform:translateY(-5.8px) rotate(-45deg)}
+
+.nav-menu{display:none;flex-direction:column;padding:8px 20px 16px;border-top:1px solid var(--linea);
+  background:rgba(255,255,255,.97);backdrop-filter:blur(18px)}
+.nav-menu.abierto{display:flex}
+.nav-menu a{padding:12px 4px;font-size:.92rem;color:var(--grafito);border-bottom:1px solid var(--niebla);
+  min-height:46px;display:flex;align-items:center}
+.nav-menu a:last-child{border-bottom:0;color:var(--cian-hondo);font-weight:600}
+
+@media(max-width:1200px){
+  .nav-links a{padding:8px 9px;font-size:.82rem}
+}
+@media(max-width:1080px){
+  .nav-links{display:none}
+  .nav-burger{display:flex}
+  .nav-acciones{margin-left:auto}
+}
+@media(max-width:560px){
+  .nav-cta{display:none}
+  .nav .wrap{gap:10px;height:60px}
+  .nav .logo img{height:22px}
+}
+
+@media(max-width:420px){
+  /* A 360 px las cuatro acciones no caben con el logo: se achican */
+  .nav .wrap{gap:8px;padding-left:14px;padding-right:14px}
+  .nav .logo img{height:20px}
+  .nav-acciones{gap:6px}
+  .nav-ic,.btn-carrito,.nav-burger{width:36px;height:36px;flex-basis:36px}
+  .nav-ic svg,.btn-carrito svg{width:17px;height:17px}
+  .franja{overflow:hidden}
 }
