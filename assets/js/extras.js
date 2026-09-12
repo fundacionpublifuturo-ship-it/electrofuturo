@@ -149,3 +149,63 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.id === 'c-datos') e.target.closest('.efp-check')?.classList.remove('error');
   });
 });
+
+/* ============================================================
+   5. BARRA DE PÍLDORAS
+   Marca la sección en la que estás, centra la píldora activa y deja
+   arrastrar el carril con el ratón además de deslizarlo con el dedo.
+   ============================================================ */
+(function () {
+  const carril = document.getElementById('nav-pills');
+  if (!carril) return;
+  const pills = [...carril.querySelectorAll('.pill-nav')];
+  const puntos = [...document.querySelectorAll('.nav-puntos .punto')];
+  let actual = '';
+
+  function marcar(id, centrar) {
+    if (id === actual) return;
+    actual = id;
+    pills.forEach(p => p.classList.toggle('activa', p.dataset.sec === id));
+    puntos.forEach(p => p.classList.toggle('activo', p.dataset.punto === id));
+    const viva = pills.find(p => p.dataset.sec === id);
+    if (centrar !== false && viva && carril.scrollWidth > carril.clientWidth) {
+      viva.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+    }
+  }
+
+  /* Qué sección está en pantalla */
+  const secciones = pills.map(p => document.getElementById(p.dataset.sec)).filter(Boolean);
+  if ('IntersectionObserver' in window && secciones.length) {
+    const vistas = new Map();
+    const io = new IntersectionObserver(es => {
+      es.forEach(e => vistas.set(e.target.id, e.intersectionRatio));
+      let mejor = '', r = 0;
+      vistas.forEach((v, k) => { if (v > r) { r = v; mejor = k; } });
+      if (mejor && r > 0.02) marcar(mejor);
+    }, { threshold:[0, .02, .15, .4, .75], rootMargin:'-140px 0px -45% 0px' });
+    secciones.forEach(s => io.observe(s));
+  }
+  pills.forEach(p => p.addEventListener('click', () => marcar(p.dataset.sec)));
+  /* Arranque: siempre hay una píldora y un punto marcados */
+  if (pills.length) marcar(pills[0].dataset.sec, false);
+
+  /* Arrastre con el ratón */
+  let arrastra = false, x0 = 0, s0 = 0, movido = 0;
+  carril.addEventListener('mousedown', e => {
+    arrastra = true; movido = 0;
+    x0 = e.pageX; s0 = carril.scrollLeft;
+    carril.classList.add('arrastrando');
+  });
+  ['mouseup','mouseleave'].forEach(ev => carril.addEventListener(ev, () => {
+    arrastra = false; carril.classList.remove('arrastrando');
+  }));
+  carril.addEventListener('mousemove', e => {
+    if (!arrastra) return;
+    const d = e.pageX - x0;
+    movido = Math.abs(d);
+    if (movido > 4) e.preventDefault();
+    carril.scrollLeft = s0 - d;
+  });
+  /* Si venía arrastrando, el clic no debe navegar */
+  carril.addEventListener('click', e => { if (movido > 6) { e.preventDefault(); e.stopPropagation(); } }, true);
+})();

@@ -848,18 +848,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       return toast('Clave copiada');
     }
     if (t.closest('#toggle-filtros'))  return $('#filtros').classList.toggle('abierto');
-    if (t.closest('#nav-burger')) {
-      const m = $('#nav-menu'), b = $('#nav-burger');
-      const abierto = m.classList.toggle('abierto');
-      b.classList.toggle('abierto', abierto);
-      b.setAttribute('aria-expanded', abierto ? 'true' : 'false');
-      return;
-    }
-    if (t.closest('#nav-menu a')) {
-      $('#nav-menu').classList.remove('abierto');
-      $('#nav-burger').classList.remove('abierto');
-      $('#nav-burger').setAttribute('aria-expanded', 'false');
-    }
     if (t.closest('#limpiar-filtros')) {
       Object.assign(estado, { categorias: [], subcategorias: [], marcas: [], soloDisponibles: false });
       return pintarCatalogo();
