@@ -30,6 +30,11 @@ let CAT = [];
 const porSku = {};
 
 async function cargarCatalogo() {
+  if (Array.isArray(window.EF_PRODUCTOS) && window.EF_PRODUCTOS.length) {
+    CAT = window.EF_PRODUCTOS;
+    CAT.forEach(p => { porSku[p.sku] = p; });
+    return;
+  }
   try {
     const r = await fetch('assets/data/productos.json', { cache: 'default' });
     CAT = await r.json();

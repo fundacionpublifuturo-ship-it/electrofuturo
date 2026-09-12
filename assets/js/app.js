@@ -37,14 +37,18 @@ async function cargarProductos() {
       throw new Error('Tabla vacía');
     } catch (e) { console.warn('Supabase no disponible:', e.message); }
   }
-  try {
-    const r = await fetch('assets/data/productos.json', { cache: 'default' });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    EF.productos = await r.json();
-  } catch (e) {
-    console.error('No se pudo cargar assets/data/productos.json:', e.message);
-    EF.productos = [];
-    toast('No se pudo cargar el catalogo. Recarga la pagina.');
+  if (Array.isArray(window.EF_PRODUCTOS) && window.EF_PRODUCTOS.length) {
+    EF.productos = window.EF_PRODUCTOS;
+  } else {
+    try {
+      const r = await fetch('assets/data/productos.json', { cache: 'default' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      EF.productos = await r.json();
+    } catch (e) {
+      console.error('No se pudo cargar el catálogo:', e.message);
+      EF.productos = [];
+      toast('No se pudo cargar el catálogo. Recarga la página.');
+    }
   }
   aplicarInventario();
   marcarFuente();

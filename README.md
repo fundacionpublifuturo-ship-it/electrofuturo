@@ -22,7 +22,8 @@ electrofuturo/
 │   ├── js/config.js              ← lo único que editas a mano
 │   ├── js/app.js                 catálogo, filtros, carrito, checkout, asesor
 │   ├── js/extras.js              academia, política de datos, carrito flotante
-│   ├── data/productos.json       213 referencias
+│   ├── js/productos.js           213 referencias (esto es lo que lee la página)
+│   ├── data/productos.json       el mismo catálogo, para importar a Supabase
 │   └── img/productos/            84 fotos, nombradas con el SKU
 │       img/marca/                los 3 logos
 │   └── js/datos.js               base compartida por la tienda y los portales
@@ -86,21 +87,24 @@ tanto, en Ajustes hay **Descargar respaldo** y **Restaurar respaldo**.
    funcione el asesor. Sin esa variable el chat responde con el mensaje de
    respaldo y manda al WhatsApp.
 
-Para probar en tu computador **no basta con abrir el `index.html`**: el catálogo
-se carga con `fetch` y el navegador lo bloquea en `file://`. Levanta un servidor
-local:
+## Probarlo en tu computador
 
-```bash
-cd electrofuturo
-python3 -m http.server 8000
-# abre http://localhost:8000
-```
+Descomprime la carpeta y **haz doble clic en `index.html`**. Funciona tal cual,
+sin servidor: el catálogo va en `assets/js/productos.js` y se carga con una
+etiqueta `<script>`, no con `fetch`, justamente para que abra desde la carpeta.
+
+Lo mismo con `admin.html` y `cuenta.html`. Los tres comparten los datos porque el
+navegador trata los archivos de una misma carpeta como un mismo origen.
+
+Importante: si arrastras los archivos **desde dentro del ZIP** sin descomprimir,
+Windows abre copias temporales sueltas y las rutas a `assets/` se rompen. Extrae
+primero.
 
 ## Editar
 
 **Teléfono, WhatsApp, Supabase:** `assets/js/config.js`.
 
-**Precios y productos:** `assets/data/productos.json`. Cada referencia tiene
+**Precios y productos:** `assets/js/productos.js`. Cada referencia tiene
 `sku`, `nombre`, `categoria`, `subcategoria`, `marca`, `precio`, `agotado` e
 `imagen`.
 
