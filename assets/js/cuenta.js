@@ -36,31 +36,31 @@ let CLIENTE = null;
    al cliente le dicen lo mismo: ya vamos. */
 const RUTA = {
   recoger: [
-    { k:'recibido',   t:'Pedido recibido',      estados:['nuevo'] },
-    { k:'pago',       t:'Pago confirmado',      estados:['pago_verificado'] },
-    { k:'alistando',  t:'Preparando tu pedido', estados:['alistando'] },
-    { k:'listo',      t:'Listo para recoger',   estados:['listo_recoger'] },
-    { k:'entregado',  t:'Entregado',            estados:['entregado'] }
+    { k:'recibido',  t:'Pedido recibido',      estados:['cotizacion','confirmado'] },
+    { k:'separado',  t:'Stock separado',       estados:['separado'] },
+    { k:'alistando', t:'Preparando tu pedido', estados:['alistamiento'] },
+    { k:'listo',     t:'Listo para recoger',   estados:['listo'] },
+    { k:'entregado', t:'Entregado',            estados:['entregado'] }
   ],
   envio: [
-    { k:'recibido',   t:'Pedido recibido',      estados:['nuevo'] },
-    { k:'pago',       t:'Pago confirmado',      estados:['pago_verificado'] },
-    { k:'alistando',  t:'Preparando tu pedido', estados:['alistando'] },
-    { k:'despachado', t:'Despachado',           estados:['despachado'] },
+    { k:'recibido',   t:'Pedido recibido',      estados:['cotizacion','confirmado'] },
+    { k:'separado',   t:'Stock separado',       estados:['separado'] },
+    { k:'alistando',  t:'Preparando tu pedido', estados:['alistamiento'] },
+    { k:'despachado', t:'Despachado',           estados:['despachado','listo'] },
     { k:'entregado',  t:'Entregado',            estados:['entregado'] }
   ]
 };
 
 const ETIQUETA = {
-  nuevo:'Recibido', pago_verificado:'Pago confirmado', alistando:'Preparando',
-  listo_recoger:'Listo para recoger', despachado:'En camino',
+  cotizacion:'Cotización', confirmado:'Recibido', separado:'Separado',
+  alistamiento:'Preparando', listo:'Listo para recoger', despachado:'En camino',
   entregado:'Entregado', anulado:'Anulado', devuelto:'Devuelto'
 };
 
 const pill = e => {
   const c = { entregado:'verde', anulado:'rojo', devuelto:'rojo',
-    listo_recoger:'cian', despachado:'cian', pago_verificado:'cian',
-    alistando:'ambar' }[e] || 'gris';
+    listo:'cian', despachado:'cian', confirmado:'azul', separado:'cian',
+    alistamiento:'ambar' }[e] || 'gris';
   return `<span class="pill ${c}">${ETIQUETA[e] || e}</span>`;
 };
 
@@ -211,7 +211,7 @@ function panelPedido(codigo, soloLectura) {
   const cuerpo = `
     <div class="aviso info" style="margin-bottom:20px">
       <b>${ETIQUETA[p.estado] || p.estado}.</b>
-      ${p.estado === 'listo_recoger' ? 'Puedes pasar por el local: Cra. 6 #18-49, Local 3.'
+      ${p.estado === 'listo' ? 'Puedes pasar por el local: Cra. 6 #18-49, Local 3.'
         : p.estado === 'despachado' ? 'Va en camino con la transportadora.'
         : p.estado === 'entregado' ? '¡Gracias por tu compra!'
         : 'Te avisamos por WhatsApp en cada cambio.'}

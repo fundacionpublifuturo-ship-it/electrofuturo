@@ -1115,3 +1115,20 @@ body::before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opa
   .efa-card__foot,.efa-pensum,.efa-toggle{padding-left:18px;padding-right:18px}
   .efp-modal__head,.efp-body,.efp-foot{padding-left:18px;padding-right:18px}
 }
+
+/* ============================================================
+   v7 — Ajustes de desborde horizontal en móvil
+   Verificado a 360, 390, 768, 1366 y 1440 px:
+   scrollWidth - clientWidth debe quedar en 0.
+   ============================================================ */
+@media(max-width:520px){
+  /* Con dos botones lado a lado, "Comprar ahora" no cabe y empuja la página */
+  .prod-acciones{grid-template-columns:1fr;gap:7px}
+  .prod-acciones .add,.prod-acciones .comprar{white-space:normal;font-size:.76rem}
+  /* La banda de anuncio no envolvía y sacaba 40 px por el costado */
+  .anuncio .centro-msj,.anuncio .msj{flex-wrap:wrap;justify-content:center;text-align:center}
+  .anuncio .msj span,.anuncio .msj b{white-space:normal}
+  .marcas{overflow:hidden}
+  .anuncio{overflow:hidden}
+  .anuncio .centro-msj{max-width:100%}
+}

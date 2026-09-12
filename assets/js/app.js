@@ -355,6 +355,15 @@ function modalConsultar() {
 function modalAvisar() {
   const p = EF.productos.find(x => x.sku === MODAL.sku);
   if (!p) return;
+  /* Queda registrado el interés: cuando entre stock, el portal admin
+     levanta la alerta con el WhatsApp del cliente ya armado. */
+  if (typeof Datos !== 'undefined') {
+    const tel = prompt('¿A qué WhatsApp te avisamos cuando llegue?');
+    if (tel) {
+      Datos.pedirAviso(p.sku, prompt('¿Tu nombre?') || 'Cliente', tel.replace(/\D/g, ''));
+      toast('Listo, te avisamos apenas entre');
+    }
+  }
   const txt = `Hola, quiero que me avisen cuando vuelva a entrar:\n\n*${p.nombre}*\nCódigo: ${p.sku}`;
   window.open(`https://wa.me/${EF_CONFIG.WHATSAPP}?text=${encodeURIComponent(txt)}`, '_blank');
 }
@@ -587,7 +596,7 @@ function registrarPedido(correo) {
     envio: CHK.flete,
     total: totalFinal(),
     pagado: true,
-    estado: 'pago_verificado',
+    estado: 'confirmado',
     origen: 'web',
     consentimiento: window.EF_consentimiento ? window.EF_consentimiento() : null
   };
