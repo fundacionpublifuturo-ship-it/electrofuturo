@@ -26,8 +26,10 @@ electrofuturo/
 │   ├── data/productos.json       el mismo catálogo, para importar a Supabase
 │   └── img/productos/            84 fotos, nombradas con el SKU
 │       img/marca/                los 3 logos
-│   └── js/datos.js               base compartida por la tienda y los portales
-│       js/admin.js               portal administrativo
+│   └── js/datos.js               base compartida: líneas, pipeline, bodega, alertas
+│       js/admin-ui.js            iconos, tablas, estados y gráficas SVG
+│       js/admin.js               cascarón, tablero, pipeline y portal de línea
+│       js/admin-mod.js           módulos y paneles de detalle
 │       js/cuenta.js              portal de clientes
 ├── admin.html                    portal administrativo
 ├── cuenta.html                   portal de clientes
@@ -38,25 +40,83 @@ electrofuturo/
 
 ## Los dos portales
 
-**`admin.html` — portal administrativo.** Tres perfiles, cada uno con una
-plataforma distinta. Usuario y contraseña iguales:
+**`admin.html` — portal administrativo.** Tres perfiles, cada uno con una plataforma
+distinta. Usuario y contraseña iguales:
 
 | Perfil | Entra con | Qué ve |
 |---|---|---|
-| Comercial | `c0m3rc14l` | Inicio, pedidos, clientes, inventario sin costos, garantías y cartera |
-| Gerencia | `g3r3nc14` | Todo lo anterior más costos, margen, finanzas, auditoría y ajustes |
-| Bodega | `b0d3g4` | Solo lo que necesita para alistar: inicio, pedidos e inventario |
+| Comercial | `c0m3rc14l` | Inicio, pipeline, líneas, clientes, inventario, cartera, garantías y alertas. **Sin costos ni utilidad** |
+| Gerencia | `g3r3nc14` | Todo, más bodega, compras, finanzas, reglas y auditoría |
+| Bodega | `b0d3g4` | Inicio, pipeline, inventario, bodega, compras y alertas. **Sin precios de venta** |
 
-Módulos: tablero por perfil, pedidos con línea de tiempo y cambio de estado,
-guía de transportadora, aviso al cliente por WhatsApp, clientes con historial,
-inventario con kardex y carga masiva por CSV, alertas de stock mínimo, cartera
-con abonos, caja con ingresos y egresos, rentabilidad por pedido, garantías,
-venta de mostrador y auditoría de cambios.
+El menú, los indicadores y las columnas cambian con el perfil: no se ocultan con CSS,
+no se dibujan.
 
-**`cuenta.html` — portal de clientes.** Se entra con el número de WhatsApp con el
-que se compró, o se rastrea un pedido solo con su código. El cliente ve la línea
-de tiempo de cada pedido, el número de guía, puede repetir un pedido con un
-botón, radicar una garantía, editar sus datos y pedir la eliminación de sus datos.
+### Arquitectura
+
+Hay **un solo componente de portal**, parametrizado por el arreglo `LINEAS` de
+`assets/js/datos.js`. Añadir una categoría es añadir un objeto a ese arreglo, nunca
+escribir una pantalla nueva. Cada línea trae su código corto y su color, que se usan en
+todo el sistema: borde de la tarjeta, fondo tenue y chip del código.
+
+| Código | Línea | Código | Línea |
+|---|---|---|---|
+| ACC | Accesorios | HER | Herramientas y repuestos |
+| CAB | Cargadores y cables | PNT | Pantallas |
+| AUD | Audio, diademas y parlantes | BAT | Baterías |
+| PWB | Power banks y tomacorrientes | COM | Computación |
+| RLJ | Relojes inteligentes | STC | Servicio técnico |
+
+Cada línea abre las mismas pestañas —Operación, Pipeline, Inventario, Movimientos,
+Clientes, Rentabilidad y Alertas— más las suyas: compatibilidad por modelo en PNT y BAT,
+órdenes de servicio en STC, especificaciones en COM.
+
+### Pipeline
+
+Un solo embudo de siete etapas: cotización → confirmado → separado → en alistamiento →
+listo para entrega → despachado → entregado y pagado. Más una etapa lateral de anulación
+con motivo obligatorio, que alimenta el informe de pérdidas.
+
+El pipeline de cada línea es **ese mismo embudo filtrado**, no una copia: lo que muevas
+en un lado se mueve en el otro. Arriba hay un filtro rápido de mostrador contra mayorista,
+porque el negocio tiene esas dos velocidades.
+
+### Bodega
+
+- **Ubicaciones** — bodega, estante, nivel y caja por referencia, con buscador que responde
+  «dónde está el SKU».
+- **Alistamiento** — la lista sale ordenada **por ubicación**, no por orden de captura, para
+  recorrer la bodega una sola vez. Cada línea se marca al recogerla y el faltante queda registrado.
+- **Traslados** — entre bodega y local, con estado en tránsito y confirmación de recepción.
+- **Conteo cíclico** — el sistema propone qué contar (primero las clase A, luego lo que lleva
+  más tiempo sin contarse), registra diferencias y exige motivo antes de cerrar.
+- **Seriales** — para relojes y power banks de gama alta, registro en la entrada y en la salida.
+
+### Compras
+
+Punto de reorden calculado con la venta diaria promedio de 90 días y el tiempo de entrega
+del proveedor. La sugerencia sale **agrupada por proveedor**, con el mensaje de WhatsApp ya
+armado, y se convierte en orden de compra que al recibirse suma inventario y registra el egreso.
+
+### Precios por escala
+
+Cada referencia puede tener sus propias escalas (1-11 / 12-49 / 50-99 / 100+) o usar las
+generales de Ajustes. Al armar un pedido el sistema aplica la escala solo y muestra el
+descuento logrado.
+
+### Motor de alertas
+
+Una función central recorre los datos y devuelve alertas con prioridad, mensaje, **acción
+recomendada** y el botón de WhatsApp con el texto listo. Cubre: stock en cero de clase A,
+stock bajo el mínimo, pedido pagado sin despachar más de dos días, alistamiento estancado,
+cotización sin respuesta, cartera vencida, referencia sin rotación, diferencia de inventario
+sin justificar, garantía por vencer, mayorista sin comprar hace más de 45 días y margen por
+debajo del mínimo.
+
+**`cuenta.html` — portal de clientes.** Se entra con el número de WhatsApp con el que se
+compró, o se rastrea un pedido solo con su código. El cliente ve la línea de tiempo del
+pedido, el número de guía, puede repetir un pedido con un botón, radicar una garantía,
+editar sus datos y pedir la eliminación de sus datos.
 
 ## Cómo se conecta el stock con la tienda
 
