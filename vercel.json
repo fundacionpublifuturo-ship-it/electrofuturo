@@ -1,18 +1,23 @@
 {
-  "cleanUrls": true,
   "headers": [
     {
-      "source": "/assets/img/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Accept-Ranges", "value": "none" }
+      ]
     },
     {
-      "comment": "El CSS y el JS se revalidan siempre. Con max-age largo, un cambio de diseño tardaba hasta un día en verse y la página quedaba con el HTML nuevo y los estilos viejos.",
-      "source": "/assets/(css|js|data)/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+      "source": "/og.jpg",
+      "headers": [
+        { "key": "Content-Type", "value": "image/jpeg" },
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
     },
     {
-      "source": "/(.*).html",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+      "source": "/index.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
     }
   ]
 }
