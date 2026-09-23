@@ -124,6 +124,9 @@ h1,h2,h3,h4,h5{font-family:var(--display);font-weight:700;letter-spacing:-.02em;
 .menu button svg{width:18px;height:18px;flex:0 0 18px;stroke-width:2}
 .menu button:hover{background:rgba(255,255,255,.07);color:var(--on-dark)}
 .menu button.activo{background:var(--cyan-600);color:#04222A;font-weight:600}
+.menu button.externo .sale{margin-left:auto;font-size:.8rem;opacity:.55}
+.menu button.externo:hover .sale{opacity:1}
+.plegada .menu .sale{display:none}
 .menu .pend{margin-left:auto;min-width:19px;height:19px;padding:0 5px;border-radius:var(--r-full);
   background:var(--danger);color:#fff;font-size:.63rem;font-weight:700;display:grid;place-items:center;
   font-variant-numeric:tabular-nums}

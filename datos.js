@@ -1,7 +1,8 @@
 /* ============================================================
    ELECTRO FUTURO — datos.js  v2
    Capa de datos compartida por index.html, admin.html y cuenta.html.
-   Guarda en localStorage; el cambio a Supabase (supabase/schema.sql)
+   Copia local de los pedidos para el portal de clientes (cuenta.html).
+   El puente con el portal admin está en nube.js y supabase/puente.sql.
    es reemplazar cuerpos de función, no rehacer pantallas.
    ============================================================ */
 (function (global) {
@@ -273,7 +274,7 @@ const Datos = {
     const items = datos.items.map(i => Object.assign({ linea:i.linea || 'ACC' }, i));
     const estado = datos.estado || 'confirmado';
     const p = {
-      codigo: `EF-${anio()}-${String(++db.seq.pedido).padStart(5, '0')}`,
+      codigo: datos.codigo || `EF-${anio()}-${String(++db.seq.pedido).padStart(5, '0')}`,
       clienteId: cliente.id, cliente: Object.assign({}, datos.cliente), items,
       linea: lineaPedido({ items }),
       canal: datos.canal || (datos.origen === 'mostrador' ? 'mostrador' : 'mayorista'),
@@ -876,10 +877,10 @@ const USUARIOS = [
 ];
 
 const PERMISOS = {
-  comercial: ['inicio','pipeline','lineas','clientes','inventario','cartera','garantias','alertas'],
+  comercial: ['inicio','pipeline','lineas','clientes','inventario','cartera','gestion','garantias','alertas'],
   gerencia:  ['inicio','pipeline','lineas','clientes','inventario','bodega','compras',
-              'cartera','finanzas','garantias','alertas','ajustes'],
-  bodega:    ['inicio','pipeline','inventario','bodega','compras','alertas']
+              'cartera','finanzas','gestion','garantias','alertas','ajustes'],
+  bodega:    ['inicio','pipeline','inventario','bodega','compras','gestion','alertas']
 };
 
 const Sesion = {

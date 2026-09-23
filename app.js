@@ -51,11 +51,30 @@ async function cargarProductos() {
     }
   }
   aplicarInventario();
+  await aplicarStockPortal();
   marcarFuente();
 }
 /* El stock que se administra en admin.html manda sobre el catálogo público.
    Los SKU que todavía no se dieron de alta en inventario conservan su
    disponibilidad original: sin ficha no hay control de stock. */
+/* El portal admin manda: si una referencia tiene existencias controladas y
+   llegó a cero, la tienda la muestra como Agotado. Las que el portal aún no
+   controla (nunca se les cargó stock) siguen como estaban. */
+async function aplicarStockPortal() {
+  if (!window.Nube) return;
+  try {
+    const st = await Nube.stock(3500);
+    let n = 0;
+    EF.productos.forEach(p => {
+      const s = st[p.sku];
+      if (!s) return;
+      if (s.precio > 0) p.precio = s.precio;
+      if (s.controla) { p.disponible = Math.max(0, s.stock); p.agotado = s.stock <= 0; n++; }
+    });
+    if (n) console.info(`Stock del portal aplicado a ${n} referencias`);
+    Nube.reintentarCola();
+  } catch (e) { console.warn('Stock del portal:', e.message); }
+}
 function aplicarInventario() {
   if (typeof Datos === 'undefined') return;
   const inv = Datos.inventario();
@@ -578,8 +597,16 @@ function simularVerificacion() {
 }
 /* Deja el pedido en la base compartida (datos.js) para que aparezca en el
    portal administrativo y en el portal del cliente, y reserve inventario. */
+function codigoWeb() {
+  const d = new Date();
+  const f = String(d.getFullYear()).slice(2) + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0');
+  const r = (Date.now().toString(36).slice(-3) + Math.random().toString(36).slice(2, 5)).toUpperCase();
+  return `EF-${f}-${r}`;
+}
 function registrarPedido(correo) {
+  const codigo = codigoWeb();
   const datos = {
+    codigo,
     cliente: {
       nombre: $('#c-nombre').value.trim(),
       telefono: $('#c-telefono').value.trim(),
@@ -600,11 +627,23 @@ function registrarPedido(correo) {
     origen: 'web',
     consentimiento: window.EF_consentimiento ? window.EF_consentimiento() : null
   };
+  /* Copia local: la usa el portal de clientes en este dispositivo */
   if (typeof Datos !== 'undefined') {
-    try { return Datos.crearPedido(datos, 'tienda').codigo; }
-    catch (e) { console.error('No se pudo registrar el pedido:', e); }
+    try { Datos.crearPedido(datos, 'tienda'); }
+    catch (e) { console.error('No se pudo guardar la copia local del pedido:', e); }
   }
-  return 'EF-' + String(1040 + Math.floor(Math.random() * 900));
+  /* El pedido viaja al portal admin: llega como venta en espera */
+  if (window.Nube) {
+    Nube.enviarPedido({
+      codigo, fecha: new Date().toISOString(),
+      cliente: Object.assign({}, datos.cliente),
+      items: datos.items,
+      entrega: datos.entrega, pago: datos.metodoPago, referencia: datos.referenciaPago,
+      subtotal: datos.subtotal, descuento: datos.descuento, envio: datos.envio, total: datos.total,
+      consentimiento: datos.consentimiento
+    }).then(r => { if (r.modo === 'cola') console.warn('Pedido en cola, se reintenta en la próxima visita'); });
+  }
+  return codigo;
 }
 function confirmarPedido() {
   const correo = $('#c-correo').value.trim() || 'cliente@correo.com';

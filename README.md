@@ -27,117 +27,117 @@ electrofuturo/
 │   └── img/productos/            84 fotos, nombradas con el SKU
 │       img/marca/                los 3 logos
 │   └── js/datos.js               base compartida: líneas, pipeline, bodega, alertas
-│       js/admin-ui.js            iconos, tablas, estados y gráficas SVG
-│       js/admin.js               cascarón, tablero, pipeline y portal de línea
-│       js/admin-mod.js           módulos y paneles de detalle
 │       js/cuenta.js              portal de clientes
-├── admin.html                    portal administrativo
+├── admin.html                    portal administrativo (Gestión POS)
 ├── cuenta.html                   portal de clientes
 ├── api/asistente.js              asesor de IA (función serverless)
-├── supabase/schema.sql           base de datos del portal admin y de clientes
+├── supabase/puente.sql           conexión tienda ↔ portal en Supabase
 └── vercel.json
 ```
 
-## Los dos portales
+## Portal administrativo (`admin.html`)
 
-**`admin.html` — portal administrativo.** Tres perfiles, cada uno con una plataforma
-distinta. Usuario y contraseña iguales:
+Es el aplicativo **PubliFuturo Gestión** con la paleta de la tienda: punto de venta con
+factura POS, cierre de caja con informes X y Z, separados y créditos, cuentas mayoristas,
+inventario y kardex multiprecio, capturador de inventario físico, clientes y terceros,
+facturas y anulaciones, cuentas por cobrar, compras y proveedores, garantías, comisiones,
+estados financieros, campañas por WhatsApp, gastos, reportes y exportación a PDF, Excel y Word.
 
-| Perfil | Entra con | Qué ve |
-|---|---|---|
-| Comercial | `c0m3rc14l` | Inicio, pipeline, líneas, clientes, inventario, cartera, garantías y alertas. **Sin costos ni utilidad** |
-| Gerencia | `g3r3nc14` | Todo, más bodega, compras, finanzas, reglas y auditoría |
-| Bodega | `b0d3g4` | Inicio, pipeline, inventario, bodega, compras y alertas. **Sin precios de venta** |
+Tiene **sus propios usuarios con PIN**. La primera vez pide crear el usuario de gerencia;
+los cajeros y bodega se crean después en Configuración. No se conecta a la DIAN.
 
-El menú, los indicadores y las columnas cambian con el perfil: no se ocultan con CSS,
-no se dibujan.
+Guarda en `localStorage` con la llave `ef_gestion_v1`. Las librerías de PDF, Excel y QR se
+cargan desde cdnjs: sin internet la aplicación funciona, pero esas exportaciones no.
 
-### Arquitectura
+## Conectar la tienda con el portal admin (Supabase)
 
-Hay **un solo componente de portal**, parametrizado por el arreglo `LINEAS` de
-`assets/js/datos.js`. Añadir una categoría es añadir un objeto a ese arreglo, nunca
-escribir una pantalla nueva. Cada línea trae su código corto y su color, que se usan en
-todo el sistema: borde de la tarjeta, fondo tenue y chip del código.
+Sin este paso cada navegador guarda su propia base: los pedidos que haga un cliente
+desde su celular **no llegan** al portal. Con Supabase todo queda en una sola base.
 
-| Código | Línea | Código | Línea |
-|---|---|---|---|
-| ACC | Accesorios | HER | Herramientas y repuestos |
-| CAB | Cargadores y cables | PNT | Pantallas |
-| AUD | Audio, diademas y parlantes | BAT | Baterías |
-| PWB | Power banks y tomacorrientes | COM | Computación |
-| RLJ | Relojes inteligentes | STC | Servicio técnico |
+**Qué hace la conexión**
 
-Cada línea abre las mismas pestañas —Operación, Pipeline, Inventario, Movimientos,
-Clientes, Rentabilidad y Alertas— más las suyas: compatibilidad por modelo en PNT y BAT,
-órdenes de servicio en STC, especificaciones en COM.
+- Los pedidos de la tienda llegan al portal como **ventas en espera**. En Punto de Venta →
+  «Recuperar venta en espera» se cargan con el cliente, los productos y el total; se
+  factura con GRABAR (F12) y el stock baja con el flujo normal del portal.
+- El portal publica precio y existencias. Una referencia que ya tiene existencias
+  cargadas y llega a cero sale **Agotado** en la tienda. Las que nunca se les cargó stock
+  siguen como estaban, para no apagar el catálogo mientras haces la carga inicial.
+- El portal guarda todos sus datos en la nube: el computador del local, el celular y los
+  cajeros ven lo mismo.
+- La primera vez que abre el portal, las 213 referencias de la tienda se cargan solas al
+  inventario, con su SKU como código.
 
-### Pipeline
+**Paso a paso**
 
-Un solo embudo de siete etapas: cotización → confirmado → separado → en alistamiento →
-listo para entrega → despachado → entregado y pagado. Más una etapa lateral de anulación
-con motivo obligatorio, que alimenta el informe de pérdidas.
+1. Entra a supabase.com, crea una cuenta y **New project**. Nombre: `electrofuturo`.
+   Región: South America (São Paulo). Guarda la contraseña de la base.
+2. Abre `supabase/puente.sql`, cambia `CAMBIA-ESTA-CLAVE` por una clave larga tuya
+   (es la **clave del negocio**) y copia todo el archivo.
+3. En Supabase: **SQL Editor → New query**, pega y **Run**. Debe decir «Success».
+4. **Project Settings → API**: copia *Project URL* y la llave *anon public*.
+5. En `assets/js/config.js` reemplaza `https://TU-PROYECTO.supabase.co` por la URL y
+   `TU_ANON_KEY` por la llave.
+6. Sube a GitHub. Vercel despliega solo.
+7. Abre `/admin.html`: pide la **clave del negocio** una sola vez por equipo.
 
-El pipeline de cada línea es **ese mismo embudo filtrado**, no una copia: lo que muevas
-en un lado se mueve en el otro. Arriba hay un filtro rápido de mostrador contra mayorista,
-porque el negocio tiene esas dos velocidades.
+**Seguridad.** Las tablas tienen RLS activo sin políticas: con la llave pública nadie las
+lee ni las escribe. Todo pasa por funciones que exigen la clave del negocio, guardada
+cifrada con bcrypt. La tienda solo puede crear pedidos y leer precio y existencias.
 
-### Bodega
+Para cambiar la clave: en SQL Editor corre
+`update public.ef_secreto set clave = extensions.crypt('NUEVA', extensions.gen_salt('bf')) where id = 1;`
+y en cada equipo abre la consola del navegador y escribe `EF_olvidarClave()`.
 
-- **Ubicaciones** — bodega, estante, nivel y caja por referencia, con buscador que responde
-  «dónde está el SKU».
-- **Alistamiento** — la lista sale ordenada **por ubicación**, no por orden de captura, para
-  recorrer la bodega una sola vez. Cada línea se marca al recogerla y el faltante queda registrado.
-- **Traslados** — entre bodega y local, con estado en tránsito y confirmación de recepción.
-- **Conteo cíclico** — el sistema propone qué contar (primero las clase A, luego lo que lleva
-  más tiempo sin contarse), registra diferencias y exige motivo antes de cerrar.
-- **Seriales** — para relojes y power banks de gama alta, registro en la entrada y en la salida.
+## Cobros Pendientes
 
-### Compras
+Módulo del portal con el cuadro de cartera que se llevaba en Excel. Arranca con los
+**67 documentos** del `CUADRO_CONSOLIDADO_FER`: $173.841.225 facturados, $44.446.100
+abonados y **$129.395.125 por cobrar** de 47 clientes.
 
-Punto de reorden calculado con la venta diaria promedio de 90 días y el tiempo de entrega
-del proveedor. La sugerencia sale **agrupada por proveedor**, con el mensaje de WhatsApp ya
-armado, y se convierte en orden de compra que al recibirse suma inventario y registra el egreso.
+**Vista.** Agrupada por cliente, como el Excel, o documento por documento. Filtros por
+estado, por riesgo y por origen. Buscador. Edades de la cartera en 1-30, 31-60, 61-90 y +90.
 
-### Precios por escala
+**Acuerdos de pago.** Al abonar se deja la fecha en que el cliente prometió pagar el resto.
+El portal lo recuerda ese día en el tablero y en la pastilla del menú. Si pasa la fecha y el
+saldo no bajó, la promesa queda marcada como incumplida y se cuenta contra el cliente.
 
-Cada referencia puede tener sus propias escalas (1-11 / 12-49 / 50-99 / 100+) o usar las
-generales de Ajustes. Al armar un pedido el sistema aplica la escala solo y muestra el
-descuento logrado.
+**Historial de gestión.** Cada llamada, WhatsApp o visita queda con fecha, resultado y qué
+dijo el cliente. En la tarjeta se ve hace cuántos días fue la última gestión, o si nunca se
+le ha escrito. Al usar el botón de cobrar, el portal pregunta después qué respondió.
 
-### Motor de alertas
+**Semáforo de riesgo.** Verde hasta 30 días de mora; amarillo hasta 60 o con una promesa
+rota; rojo por encima de 60 o con dos promesas rotas. Se ve en la tarjeta y filtra la lista.
 
-Una función central recorre los datos y devuelve alertas con prioridad, mensaje, **acción
-recomendada** y el botón de WhatsApp con el texto listo. Cubre: stock en cero de clase A,
-stock bajo el mínimo, pedido pagado sin despachar más de dos días, alistamiento estancado,
-cotización sin respuesta, cartera vencida, referencia sin rotación, diferencia de inventario
-sin justificar, garantía por vencer, mayorista sin comprar hace más de 45 días y margen por
-debajo del mínimo.
+**Cupo de crédito.** El saldo de este cuadro cuenta dentro del cupo del cliente en el punto
+de venta. Si va a superarlo, el POS pide autorización de gerencia. Además, al facturar a
+crédito a un cliente amarillo el sistema advierte, y a uno rojo exige autorización.
 
-**`cuenta.html` — portal de clientes.** Se entra con el número de WhatsApp con el que se
-compró, o se rastrea un pedido solo con su código. El cliente ve la línea de tiempo del
-pedido, el número de guía, puede repetir un pedido con un botón, radicar una garantía,
-editar sus datos y pedir la eliminación de sus datos.
+**Envío masivo.** «Enviar a todos, uno por uno» abre WhatsApp cliente por cliente con el
+mensaje escrito y va registrando la gestión. También lleva el segmento «Cartera del cuadro»
+a Campañas WhatsApp. Los deudores sin número aparecen en un aviso con una pantalla para
+cargarlos de una, empezando por los que más deben.
 
-## Cómo se conecta el stock con la tienda
+**Recibo de caja.** Cada abono genera un consecutivo RC-0001 y su comprobante en PDF para
+enviarle al cliente.
 
-El inventario del portal manda sobre el catálogo público. Al confirmar un pedido
-se **reserva** la cantidad; al pasar a *listo para recoger* o *despachado* se
-descuenta de verdad; al anular se libera. Un producto queda **Agotado** en la
-tienda cuando su disponible llega a cero.
+**Proyección de recaudo.** Cuánto vence cada una de las próximas cuatro semanas y cuánto de
+eso tiene promesa de pago, contra lo realmente recaudado en el mes.
 
-Las referencias que todavía no se han dado de alta en inventario **no** entran en
-ese control: siguen mostrándose como hasta ahora. Así puedes ir cargando el stock
-por partes sin que las otras 200 referencias aparezcan agotadas.
+**Créditos del punto de venta.** Las ventas a crédito del POS aparecen en el mismo cuadro,
+marcadas como POS, para no llevar dos carteras.
 
-### Límite que hay que tener claro
+**Importar.** Sube el `.xlsx` o el `.csv`, o pega las filas de Excel. Reconoce CLIENTE,
+#FACTURA, FECHA DE REMISION, FECHA DE CANCELACION, VALOR TOTAL y ABONO en cualquier orden y
+omite los repetidos. Exporta a PDF, Excel y Word.
 
-Hoy los datos viven en el `localStorage` del navegador. Funciona sin servidor y
-sirve para operar y probar el flujo completo, pero **cada dispositivo tiene su
-propia copia**: lo que registres en el computador del local no se ve en tu
-celular. Para compartirlos hay que crear el proyecto en Supabase, correr
-`supabase/schema.sql` y cambiar el cuerpo de las funciones de
-`assets/js/datos.js`, que ya están escritas con ese cambio en mente. Mientras
-tanto, en Ajustes hay **Descargar respaldo** y **Restaurar respaldo**.
+Lo ven gerencia y comercial.
+
+## Portal de clientes (`cuenta.html`)
+
+Se entra con el número de WhatsApp con el que se compró, o se rastrea un pedido solo con su
+código. Muestra la línea de tiempo del pedido, el número de guía, repetir pedido, radicar
+garantía, editar datos y pedir la eliminación de datos.
+
 
 ## Subirlo
 
@@ -200,13 +200,3 @@ cuando hay algo en el carrito, carrito vacío con salida al catálogo, y el arra
 aislado en `try/catch` para que un error de datos no deje la página sin responder
 a los clics.
 
-## Base de datos
-
-`supabase/schema.sql` deja lista la base para el portal administrativo y el de
-clientes: productos con stock y costo, clientes, pedidos con línea de tiempo,
-inventario con kardex, cartera, caja, garantías y auditoría.
-
-Trae las políticas de seguridad (RLS) que impiden que el usuario comercial vea
-costos y utilidad. Eso no se puede resolver ocultando columnas en la pantalla:
-sin RLS, cualquiera con la clave anónima lee la tabla completa desde la consola
-del navegador.
