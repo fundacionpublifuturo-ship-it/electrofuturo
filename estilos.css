@@ -88,13 +88,19 @@ h1,h2,h3,h4{font-family:var(--display);margin:0;letter-spacing:-.032em;line-heig
   display:grid;place-items:center;opacity:.5;font-size:1rem;line-height:1;color:#fff;transition:.2s}
 .anuncio .cerrar:hover{opacity:1;background:rgba(255,255,255,.1)}
 .anuncio.oculto{display:none}
-@media (max-width:560px){
-  .anuncio .wrap{grid-template-columns:1fr 30px;padding:9px 14px 9px 16px;gap:8px}
-  .anuncio .centro-msj{grid-column:1 !important;justify-content:flex-start;text-align:left;
-    font-size:.75rem;line-height:1.45;min-width:0}
-  .anuncio .msj{display:inline;white-space:normal}
-  .anuncio a{margin-top:2px}
-  .anuncio .cerrar{grid-column:2;align-self:start}
+/* El texto completo solo se ve en pantallas anchas; en celular el mensaje
+   corto + el enlace ya dicen lo mismo en una sola línea, sin verse apretado. */
+.solo-desktop{display:inline}
+@media (max-width:680px){
+  .anuncio .wrap{grid-template-columns:1fr 26px;padding:8px 12px 8px 16px;gap:8px;min-height:0}
+  /* Texto corrido en vez de flex: así el enlace fluye justo después del
+     mensaje, como una frase normal, en vez de saltar a su propia línea. */
+  .anuncio .centro-msj{grid-column:1 !important;display:block;text-align:left;
+    font-size:.72rem;line-height:1.5;min-width:0}
+  .anuncio .msj{display:inline}
+  .anuncio a{display:inline-flex;vertical-align:middle;margin-left:4px}
+  .anuncio .cerrar{grid-column:2;align-self:center;width:24px;height:24px;font-size:.85rem}
+  .solo-desktop{display:none}
 }
 /* ---------- Nav ---------- */
 .nav{position:sticky;top:0;z-index:70;background:rgba(255,255,255,.82);
@@ -677,7 +683,12 @@ h1,h2,h3,h4{font-family:var(--display);margin:0;letter-spacing:-.032em;line-heig
   .panel-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media (max-width:920px){
-  .modal{grid-template-columns:1fr;max-height:calc(100vh - 32px)}
+  /* Antes .modal-datos no tenía un alto delimitado dentro del grid, así que su
+     overflow-y:auto nunca se activaba: el contenido se salía y .modal (que sí
+     tiene max-height + overflow:hidden) lo recortaba de raíz — por eso el botón
+     "Agregar al pedido" quedaba cortado en celular. Con la fila en minmax(0,1fr)
+     el bloque de datos sí queda acotado y su scroll interno funciona de verdad. */
+  .modal{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);max-height:calc(100vh - 32px)}
   .modal-visual{min-height:240px;border-right:0;border-bottom:1px solid var(--linea);padding:22px}
   .modal-visual img{max-height:200px}
   .modal-datos{padding:26px}
@@ -708,29 +719,68 @@ h1,h2,h3,h4{font-family:var(--display);margin:0;letter-spacing:-.032em;line-heig
 }
 @media (max-width:680px){
   .grid-prod,.cats,.grid-catalogo{grid-template-columns:repeat(2,1fr)}
-  .seccion{padding:54px 0}
-  .panel{padding:30px 22px}
-  .panel-grid{grid-template-columns:1fr;gap:24px}
+  .seccion{padding:36px 0}
+  .panel{padding:28px 20px}
+  .panel-grid{grid-template-columns:1fr;gap:18px}
   .footer-grid{grid-template-columns:1fr 1fr}
   .prod h3{font-size:.86rem}
   .accesos{grid-template-columns:1fr}
   .cotizador{padding:22px 18px}
   .banda{padding:30px 20px}
-  .anuncio .wrap{padding:10px 40px 10px 18px;font-size:.77rem}
   .modal-fondo{padding:0}
   .modal{border-radius:0;width:100%;height:100vh;max-height:100vh}
   .ia-panel{bottom:0;right:0;left:0;width:100%;height:86vh;border-radius:var(--r-xl) var(--r-xl) 0 0}
+
+  /* ---------- Modo compacto de celular ----------
+     Menos aire entre secciones y elementos más chicos, para que quepa más
+     por pantalla y navegar sea más corto, sin perder que se pueda leer. */
+  .eyebrow{font-size:.6rem;margin-bottom:8px;gap:8px}
+  .hero .wrap{padding-top:28px;padding-bottom:28px;gap:26px}
+  .hero h1{font-size:clamp(1.9rem,7.5vw,2.5rem);margin-bottom:10px}
+  .hero .lead{font-size:.88rem;margin-bottom:16px}
+  .hero-cta{gap:8px}
+  .hero-buscar{margin-top:16px}
+  .hero-buscar input{padding:13px 48px 13px 18px;font-size:.88rem}
+  .arco{min-height:0;padding:8px 0 4px}
+  .mockup{padding:16px}
+  .btn{padding:11px 20px;font-size:.85rem;gap:7px}
+  .franja-item{padding:13px 16px;gap:9px;min-height:0}
+  .franja-item p{font-size:.78rem}
+  .grid-prod,.grid-catalogo{gap:10px}
+  .prod-foto{aspect-ratio:1/.8}
+  .prod-foto img{padding:8px}
+  .prod .lupa{width:26px;height:26px;font-size:.72rem;bottom:8px;right:8px}
+  .prod .etiqueta{padding:4px 8px;top:8px;left:8px}
+  .prod-cuerpo{padding:10px 12px 12px}
+  .prod .sku{font-size:.54rem}
+  .prod h3{margin:4px 0 3px}
+  .prod .marca-p{font-size:.68rem;margin-bottom:9px}
+  .prod .pie{padding-top:9px}
+  .precio{font-size:1rem}
+  .add{width:32px;height:32px;font-size:.95rem;flex:0 0 32px}
+  .cat{padding:16px 14px;min-height:0}
+  .cat .ic{width:36px;height:36px;font-size:1rem}
+  .cat h3{font-size:.94rem;margin:12px 0 4px}
+  .cotizador{padding:18px 16px}
+  .panel-grid .it .ic{margin-bottom:9px}
+  .footer{padding:34px 0 16px}
+  .footer-grid{gap:20px;padding-bottom:20px}
 }
 @media (max-width:430px){
   .cats{grid-template-columns:1fr}
-  .grid-prod,.grid-catalogo{grid-template-columns:repeat(2,1fr);gap:12px}
+  .grid-prod,.grid-catalogo{grid-template-columns:repeat(2,1fr);gap:10px}
   .wrap{padding:0 16px}
-  .prod-cuerpo{padding:11px 12px 13px}
+  .prod-cuerpo{padding:9px 10px 11px}
   .precio{font-size:.98rem}
   .logo .marca-txt{display:none}
   .logo .sep{display:none}
-  .modal-datos{padding:20px}
-  .modal-precio .v{font-size:1.7rem}
+  .modal-datos{padding:18px}
+  .modal-precio{padding:12px 0;margin-bottom:14px}
+  .modal-precio .v{font-size:1.5rem}
+  .seccion{padding:30px 0}
+  .hero h1{font-size:clamp(1.7rem,8.5vw,2.2rem)}
+  .franja .wrap{grid-template-columns:1fr 1fr}
+  .footer-grid{grid-template-columns:1fr}
 }
 /* ============================================================
    v4 — Cuadratura y profundidad de grises
