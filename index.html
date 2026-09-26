@@ -21,12 +21,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/estilos.css?v=15">
 <style>section[id],header[id]{scroll-margin-top:86px}</style>
-
 <style>
-/* === SISTEMA DE PESTAÑAS === */
 .ef-tab{display:none}
 .ef-tab.ef-tab--activa{display:block}
-/* La pill activa ya tiene estilo .activa en el CSS existente, así que no hay que agregar más */
+.ef-tab.ef-tab--activa .reveal{opacity:1!important;transform:none!important;transition:none!important}
 </style>
 </head>
 
@@ -224,8 +222,8 @@
     <div class="grid-prod reveal" id="destacados"></div>
   </div>
 </section>
+</div><!-- /ef-tab inicio-0 -->
 <div class="ef-tab" data-tab="catalogo">
-</div><!-- /ef-tab inicio -->
 <!-- ======================= CATÁLOGO ======================= -->
 <section class="cat-header" id="catalogo">
   <div class="wrap">
@@ -276,8 +274,8 @@
     </section>
   </div>
 </div>
+</div><!-- /ef-tab catalogo-1 -->
 <div class="ef-tab" data-tab="cotizador">
-</div><!-- /ef-tab catalogo -->
 <!-- ======================= COTIZADOR ======================= -->
 <section class="seccion gris" id="cotizador">
   <div class="wrap">
@@ -328,6 +326,8 @@
     </div>
   </div>
 </section>
+</div><!-- /ef-tab cotizador-2 -->
+<div class="ef-tab ef-tab--activa" data-tab="inicio">
 <!-- ======================= PROCESO ======================= -->
 <section class="seccion">
   <div class="wrap">
@@ -390,8 +390,8 @@
     </div>
   </div>
 </section>
+</div><!-- /ef-tab inicio-3 -->
 <div class="ef-tab" data-tab="tecnica">
-</div><!-- /ef-tab cotizador -->
 <!-- ======================= LÍNEA TÉCNICA ======================= -->
 <section class="seccion gris" id="tecnica">
   <div class="wrap">
@@ -424,8 +424,8 @@
     </div>
   </div>
 </section>
+</div><!-- /ef-tab tecnica-4 -->
 <div class="ef-tab" data-tab="academy">
-</div><!-- /ef-tab tecnica -->
 <!-- ======================= ACADEMY ======================= -->
 <section class="seccion nieve" id="academy">
   <div class="wrap">
@@ -452,8 +452,8 @@
   </div>
 </section>
 
+</div><!-- /ef-tab academy-5 -->
 <div class="ef-tab" data-tab="lista-precios">
-</div><!-- /ef-tab academy -->
 <!-- ======================= LISTA DE PRECIOS (LEAD) ======================= -->
 <section class="seccion gris" id="lista-precios">
   <div class="wrap">
@@ -502,8 +502,8 @@
     </div>
   </div>
 </section>
+</div><!-- /ef-tab lista-precios-6 -->
 <div class="ef-tab" data-tab="preguntas">
-</div><!-- /ef-tab lista-precios -->
 <!-- ======================= PREGUNTAS ======================= -->
 <section class="seccion" id="preguntas">
   <div class="wrap">
@@ -553,8 +553,8 @@
     </div>
   </div>
 </section>
+</div><!-- /ef-tab preguntas-7 -->
 <div class="ef-tab" data-tab="ubicacion">
-</div><!-- /ef-tab preguntas -->
 <!-- ======================= UBICACIÓN ======================= -->
 <section class="seccion gris" id="ubicacion">
   <div class="wrap">
@@ -591,8 +591,6 @@
     </div>
   </div>
 </section>
-</div><!-- /ef-tab ubicacion -->
-<div class="ef-tab ef-tab--activa" data-tab="inicio">
 <!-- ======================= BANDA CTA ======================= -->
 <section class="seccion" style="padding-top:0">
   <div class="wrap">
@@ -606,7 +604,7 @@
     </div>
   </div>
 </section>
-</div><!-- /ef-tab inicio (banda CTA) -->
+</div><!-- /ef-tab ubicacion-8 -->
 <!-- ======================= FOOTER ======================= -->
 <footer class="footer" id="contacto">
   <div class="wrap">
@@ -966,107 +964,45 @@
 <script src="assets/js/nube.js?v=15"></script>
 <script src="assets/js/app.js?v=15"></script>
 <script src="assets/js/extras.js?v=15"></script>
-
 <script>
-/* === SISTEMA DE PESTAÑAS ===
-   Reemplaza el scroll por pestañas: al hacer clic en una píldora,
-   se muestra solo el contenido de esa pestaña y se ocultan las demás.
-   Compatible con el hash de la URL (#catalogo, etc.) y con los links
-   internos de la página (botones "Explorar el catálogo", etc.).
-*/
 (function(){
-  const tabs = document.querySelectorAll('.ef-tab');
-  const pills = document.querySelectorAll('.pill-nav');
-  const puntos = document.querySelectorAll('.nav-puntos .punto');
-
-  function activarTab(id, scroll){
-    // Mostrar solo la pestaña correspondiente
-    tabs.forEach(t => t.classList.toggle('ef-tab--activa', t.dataset.tab === id));
-    // Marcar la píldora activa
-    pills.forEach(p => {
-      const activa = p.dataset.sec === id;
-      p.classList.toggle('activa', activa);
-      if(activa && scroll !== false){
-        p.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
-      }
+  var tabs=document.querySelectorAll('.ef-tab'),pills=document.querySelectorAll('.pill-nav');
+  function go(id,scroll){
+    tabs.forEach(function(t){t.classList.toggle('ef-tab--activa',t.dataset.tab===id)});
+    pills.forEach(function(p){
+      var a=p.dataset.sec===id;
+      p.classList.toggle('activa',a);
+      if(a&&scroll!==false)p.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
     });
-    // Marcar el punto indicador
-    puntos.forEach(p => p.classList.toggle('activo', p.dataset.punto === id));
-    // Scroll al top de la página
-    if(scroll !== false) window.scrollTo({top:0, behavior:'smooth'});
-    // Actualizar el hash sin hacer scroll
-    if(id !== 'inicio') history.replaceState(null,'','#'+id);
-    else history.replaceState(null,'','#');
+    if(scroll!==false)window.scrollTo({top:0,behavior:'smooth'});
+    if(id!=='inicio')history.replaceState(null,'','#'+id);
+    else history.replaceState(null,'',location.pathname);
   }
-
-  // Interceptar clics en las píldoras
-  pills.forEach(p => {
-    p.addEventListener('click', function(e){
-      e.preventDefault();
-      activarTab(this.dataset.sec);
-    });
+  pills.forEach(function(p){p.addEventListener('click',function(e){e.preventDefault();go(this.dataset.sec)})});
+  document.addEventListener('click',function(e){
+    var a=e.target.closest('a[href^="#"]');if(!a)return;
+    var h=a.getAttribute('href').replace('#',''),
+    m={top:'inicio',catalogo:'catalogo',cotizador:'cotizador',tecnica:'tecnica',academy:'academy',
+       'lista-precios':'lista-precios',preguntas:'preguntas',ubicacion:'ubicacion',contacto:'ubicacion',categorias:'catalogo'};
+    if(m[h]){e.preventDefault();go(m[h])}
   });
-
-  // Interceptar links internos que apuntan a secciones (ej. "Explorar el catálogo")
-  document.addEventListener('click', function(e){
-    const a = e.target.closest('a[href^="#"]');
-    if(!a) return;
-    const hash = a.getAttribute('href').replace('#','');
-    // Mapear IDs de sección a IDs de pestaña
-    const mapeo = {
-      'top':'inicio', 'catalogo':'catalogo', 'cotizador':'cotizador',
-      'tecnica':'tecnica', 'academy':'academy', 'lista-precios':'lista-precios',
-      'preguntas':'preguntas', 'ubicacion':'ubicacion', 'contacto':'ubicacion',
-      'categorias':'inicio'
-    };
-    if(mapeo[hash]){
-      e.preventDefault();
-      activarTab(mapeo[hash]);
-    }
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('[data-ir-q]');if(!b)return;e.preventDefault();go('catalogo');
+    setTimeout(function(){var inp=document.getElementById('buscar');if(inp){inp.focus();inp.scrollIntoView({behavior:'smooth',block:'center'})}},200);
   });
-
-  // Interceptar botones data-ir-q (van al catálogo y enfocan el buscador)
-  document.addEventListener('click', function(e){
-    const btn = e.target.closest('[data-ir-q]');
-    if(!btn) return;
-    e.preventDefault();
-    activarTab('catalogo');
-    setTimeout(()=>{
-      const inp = document.getElementById('buscar');
-      if(inp){ inp.focus(); inp.scrollIntoView({behavior:'smooth', block:'center'}); }
-    }, 200);
+  var bh=document.getElementById('buscar-hero');
+  if(bh)bh.addEventListener('focus',function(){go('catalogo');
+    setTimeout(function(){var inp=document.getElementById('buscar');if(inp){inp.focus();inp.value=bh.value;inp.dispatchEvent(new Event('input'))}},200);
   });
-
-  // El buscador del hero también lleva al catálogo
-  const buscHero = document.getElementById('buscar-hero');
-  if(buscHero){
-    buscHero.addEventListener('focus', function(){
-      activarTab('catalogo');
-      setTimeout(()=>{
-        const inp = document.getElementById('buscar');
-        if(inp){ inp.focus(); inp.value = buscHero.value; inp.dispatchEvent(new Event('input')); }
-      }, 200);
-    });
+  function fromHash(){
+    var h=location.hash.replace('#',''),
+    m={'':'inicio',top:'inicio',catalogo:'catalogo',cotizador:'cotizador',tecnica:'tecnica',academy:'academy',
+       'lista-precios':'lista-precios',preguntas:'preguntas',ubicacion:'ubicacion',contacto:'ubicacion'};
+    go(m[h]||'inicio',false);
   }
-
-  // Cargar la pestaña correcta según el hash de la URL
-  function desdeHash(){
-    const h = location.hash.replace('#','');
-    const mapeo = {
-      '':'inicio', 'top':'inicio', 'catalogo':'catalogo', 'cotizador':'cotizador',
-      'tecnica':'tecnica', 'academy':'academy', 'lista-precios':'lista-precios',
-      'preguntas':'preguntas', 'ubicacion':'ubicacion', 'contacto':'ubicacion'
-    };
-    activarTab(mapeo[h] || 'inicio', false);
-  }
-  window.addEventListener('hashchange', desdeHash);
-
-  // Desactivar el IntersectionObserver del extras.js que pelea con las pestañas
-  // Lo hacemos marcando que el sistema de tabs está activo
-  window.EF_TABS_ACTIVO = true;
-
-  // Arranque
-  desdeHash();
+  window.addEventListener('hashchange',fromHash);
+  window.EF_TABS_ACTIVO=true;
+  fromHash();
 })();
 </script>
 </body>
