@@ -150,7 +150,7 @@ function cardProducto(p) {
         ${p.agotado
           ? '<span class="badge-agotado">Agotado</span>'
           : `<button class="add" data-sku="${p.sku}" aria-label="Agregar ${esc(p.nombre)} al pedido">Agregar</button>
-             <button class="comprar" data-comprar="${p.sku}" aria-label="Comprar ${esc(p.nombre)} ahora">Comprar ahora</button>`}
+             <button class="comprar" data-comprar="${p.sku}" aria-label="Comprar ${esc(p.nombre)} ahora">Comprar</button>`}
       </div>
     </div>
   </article>`;
@@ -175,7 +175,83 @@ function pintarConteos() {
    3. FILTROS FACETADOS
    Las marcas y subcategorías se recalculan según lo ya filtrado
    ============================================================ */
-const estado = { q: '', categorias: [], subcategorias: [], marcas: [], soloDisponibles: false, orden: 'relevancia' };
+const estado = { q: '', categorias: [], subcategorias: [], marcas: [], soloDisponibles: false, orden: 'relevancia', grupo: '', sub: -1 };
+/* ============================================================
+   3.a NAVEGADOR DE CATEGORÍAS
+   Grupos principales -> subcategorías. Una subcategoría se define con
+   reglas (c = categoría, s = subcategoría, m = marca, n = texto) y puede
+   repetirse en varios grupos cuando tiene relación (Micrófonos, Cargadores de reloj…).
+   Para crear una subcategoría nueva basta con agregarla aquí.
+   ============================================================ */
+const EF_GRUPOS = [{"id":"cargadores","t":"Cargadores","ic":"bolt","subs":[{"t":"De pared","r":[{"s":["Cargadores de pared"]}]},{"t":"Carga rápida","r":[{"s":["Cargadores de pared","Cargadores de carro"],"n":"\\b(1[89]|[2-9]\\d|1\\d\\d) ?w\\b|turbo|\\bgan\\b|\\bpd\\b|qc"}]},{"t":"Para carro y moto","r":[{"s":["Cargadores de carro"]}]},{"t":"Inalámbricos y MagSafe","r":[{"s":["Cargadores inalambricos","Cargadores inalámbricos","Power banks inalámbricos"]}]},{"t":"Para iPhone","r":[{"s":["Cargadores de pared","Cargadores de carro","Cargadores inalámbricos"],"n":"iphone|lightning|apple"}]},{"t":"Originales","r":[{"s":["Cargadores de pared"],"n":"original"}]},{"t":"Para reloj","r":[{"s":["Cargadores para reloj"]}]},{"t":"De viaje y adaptadores","r":[{"s":["Adaptadores de viaje"]},{"s":["Cargadores de pared"],"n":"ac/dc|p4|bahia|laptop"}]}]},{"id":"cables","t":"Cables","ic":"cable","subs":[{"t":"Tipo C","r":[{"s":["Cables de datos"],"n":"tipo c|type-c|usb-c"}]},{"t":"Lightning (iPhone)","r":[{"s":["Cables de datos"],"n":"lightning"}]},{"t":"Micro USB (V8)","r":[{"s":["Cables de datos"],"n":"v8|v3"}]},{"t":"Magnéticos y especiales","r":[{"s":["Cables de datos"],"n":"magnetic|4 en 1|pantalla digital|\\bdc\\b|inteligente|silicona"}]},{"t":"Audio y auxiliar","r":[{"s":["Cables de audio"]}]},{"t":"HDMI y video","r":[{"c":["Computación"],"s":["Cables"],"n":"hdmi|vga|audio"}]},{"t":"Red, poder y extensión","r":[{"c":["Computación"],"s":["Cables"],"n":"red|poder|extension"}]},{"t":"Adaptadores y OTG","r":[{"s":["Hubs y OTG"]}]}]},{"id":"audio","t":"Audio","ic":"audio","subs":[{"t":"Audífonos Bluetooth","r":[{"s":["Audífonos inalámbricos"]}]},{"t":"Deportivos y de cuello","r":[{"s":["Audífonos deportivos"]}]},{"t":"Manos libres","r":[{"s":["Audífonos con cable"]}]},{"t":"Diademas","r":[{"c":["Audífonos y parlantes","Computación"],"n":"diadema"}]},{"t":"Gamer","r":[{"c":["Audífonos y parlantes","Computación"],"s":["Diademas","Audio","Audífonos inalámbricos"],"n":"gamer"}]},{"t":"Parlantes","r":[{"s":["Parlantes"]},{"c":["Computación"],"n":"parlante"}]},{"t":"Karaoke y fiesta","r":[{"s":["Parlantes"],"n":"karaoke|microfono|perifoneo|dual"}]},{"t":"Radios","r":[{"s":["Radios"]}]},{"t":"Micrófonos","r":[{"s":["Micrófonos"]}]},{"t":"Gafas y receptores","r":[{"s":["Gafas Bluetooth","Receptores Bluetooth"]}]}]},{"id":"energia","t":"Power bank","ic":"bateria","subs":[{"t":"Power banks","r":[{"s":["Power banks"]}]},{"t":"Magnéticos e inalámbricos","r":[{"s":["Power banks inalámbricos"]}]},{"t":"Gran capacidad","r":[{"s":["Power banks","Power banks inalámbricos"],"n":"(20|30|50)\\.000"}]},{"t":"Compactos","r":[{"s":["Power banks","Power banks inalámbricos"],"n":"(2|5|10)\\.000|2 en 1"}]},{"t":"Multitomas","r":[{"s":["Tomacorrientes"]}]}]},{"id":"smartwatch","t":"Smartwatch","ic":"reloj","subs":[{"t":"Smartwatch","r":[{"s":["Smartwatch"]}]},{"t":"Para niños","r":[{"s":["Smartwatch infantil"]}]},{"t":"Xiaomi y Redmi","r":[{"c":["Smartwatch"],"m":["Xiaomi","Redmi"]}]},{"t":"Con llamadas","r":[{"c":["Smartwatch"],"n":"llamada"}]},{"t":"Pantalla AMOLED","r":[{"c":["Smartwatch"],"n":"amoled"}]},{"t":"Pulsos y correas","r":[{"s":["Correas y pulsos"]}]},{"t":"Cargadores de reloj","r":[{"s":["Cargadores para reloj"]}]}]},{"id":"proteccion","t":"Protección","ic":"escudo","subs":[{"t":"Cases para celular","r":[{"s":["Fundas y cases"],"n":"^(?!.*(airpods|cargador|tapa polvo)).*(case|funda)"}]},{"t":"Hidrogel y protectores","r":[{"s":["Protección de pantalla"]}]},{"t":"Para AirPods y cargador","r":[{"s":["Fundas y cases"],"n":"airpods|cargador"}]},{"t":"Tapa polvo","r":[{"s":["Fundas y cases"],"n":"tapa polvo"}]},{"t":"Pop sockets y ventosas","r":[{"s":["Pop sockets"]},{"s":["Soportes para celular"],"n":"ventosa|soporte"}]},{"t":"Llaveros y pines","r":[{"s":["Llaveros"]},{"s":["Soportes para celular"],"n":"pines"}]}]},{"id":"soportes","t":"Soportes y creadores","ic":"camara","subs":[{"t":"Holders carro y moto","r":[{"s":["Holders y soportes"]}]},{"t":"Trípodes y selfie","r":[{"s":["Trípodes y fotografía"]}]},{"t":"Luces y aros","r":[{"s":["Iluminación y creadores"],"n":"luz|aro|lampara"}]},{"t":"Micrófonos","r":[{"s":["Micrófonos"]}]},{"t":"Control para selfies","r":[{"s":["Iluminación y creadores"],"n":"control"}]},{"t":"Soportes para TV","r":[{"s":["Soportes para TV"]}]}]},{"id":"computacion","t":"Computación","ic":"pc","subs":[{"t":"Teclados","r":[{"s":["Teclados"]}]},{"t":"Mouse","r":[{"s":["Mouse"]}]},{"t":"Pad mouse","r":[{"s":["Pad Mouse"]}]},{"t":"Hubs y OTG","r":[{"s":["Hubs y OTG"]}]},{"t":"WiFi y Bluetooth","r":[{"s":["Conectividad"]}]},{"t":"Cables","r":[{"c":["Computación"],"s":["Cables"]}]},{"t":"Audio para PC","r":[{"c":["Computación"],"s":["Audio"]}]},{"t":"Micrófonos","r":[{"s":["Micrófonos"]}]},{"t":"Cámaras web","r":[{"c":["Computación"],"s":["Cámaras"]}]},{"t":"Bases para portátil","r":[{"s":["Bases y protección"]}]},{"t":"Maletines","r":[{"s":["Maletines para PC"]}]},{"t":"Discos y limpieza","r":[{"s":["Almacenamiento","Limpieza"]}]}]},{"id":"repuestos","t":"Repuestos","ic":"llave","subs":[{"t":"Pantallas Samsung","r":[{"c":["Pantallas"],"s":["Samsung"]}]},{"t":"Pantallas Xiaomi","r":[{"c":["Pantallas"],"s":["Xiaomi"]}]},{"t":"Pantallas Motorola","r":[{"c":["Pantallas"],"s":["Motorola"]}]},{"t":"Pantallas iPhone","r":[{"c":["Pantallas"],"s":["iPhone"]}]},{"t":"Pantallas Honor / Huawei","r":[{"c":["Pantallas"],"s":["Honor / Huawei"]}]},{"t":"Pantallas Vivo / Oppo","r":[{"c":["Pantallas"],"s":["Vivo / Oppo"]}]},{"t":"Pantallas Tecno / Infinix","r":[{"c":["Pantallas"],"s":["Tecno / Infinix"]}]},{"t":"Baterías iPhone","r":[{"c":["Baterías"]}]}]},{"id":"hogar","t":"Hogar y más","ic":"casa","subs":[{"t":"Celulares básicos","r":[{"s":["Celulares básicos"]}]},{"t":"Tablets y lápices","r":[{"s":["Tablets y accesorios"]}]},{"t":"Cámaras de seguridad","r":[{"s":["Cámaras de seguridad"]}]},{"t":"TV y streaming","r":[{"s":["TV y streaming"]}]},{"t":"Hogar y oficina","r":[{"s":["Hogar y gadgets"],"n":"ventilador|dispensador|exhibidor|localizador|termo"}]},{"t":"Compresores de aire","r":[{"s":["Hogar y gadgets"],"n":"compresor"}]},{"t":"Cuidado personal","r":[{"s":["Hogar y gadgets"],"n":"afeitar|patillera"}]},{"t":"Gamer","r":[{"s":["Hogar y gadgets"],"n":"gamer|enfriador"}]},{"t":"Lámparas decorativas","r":[{"s":["Iluminación y creadores"],"n":"medusa|lampara"}]}]}];
+const EF_ICONOS = {
+  bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+  cable:'<path d="M7 3v5M11 3v5M5 8h8v3a4 4 0 0 1-8 0zM9 15v2a4 4 0 0 0 4 4h1a4 4 0 0 0 4-4V9"/><path d="M16 5h4v4h-4z"/>',
+  audio:'<path d="M4 15v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="1.6"/><rect x="17" y="14" width="4" height="7" rx="1.6"/>',
+  bateria:'<rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 1.5h4M12.8 8 10 12.5h4L11.2 17"/>',
+  reloj:'<rect x="6" y="6" width="12" height="12" rx="3"/><path d="M9 6 9.6 2h4.8L15 6M9 18l.6 4h4.8l.6-4M12 9.5V12l1.6 1.2"/>',
+  escudo:'<path d="M12 3 5 6v5.5c0 4.3 3 8.2 7 9.5 4-1.3 7-5.2 7-9.5V6z"/><path d="m9.3 12 1.9 1.9 3.6-3.6"/>',
+  camara:'<path d="M4 8h3l1.6-2.5h6.8L17 8h3v11H4z"/><circle cx="12" cy="13.2" r="3.4"/>',
+  pc:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  llave:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.4 2.4-2.6-.4-.4-2.6z"/>',
+  casa:'<path d="M3 11 12 4l9 7"/><path d="M5.5 9.5V20h13V9.5"/><path d="M10 20v-5h4v5"/>',
+  todo:'<rect x="4" y="4" width="7" height="7" rx="1.6"/><rect x="13" y="4" width="7" height="7" rx="1.6"/><rect x="4" y="13" width="7" height="7" rx="1.6"/><rect x="13" y="13" width="7" height="7" rx="1.6"/>'
+};
+const sinTilde = s => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+function textoRegla(p) {
+  if (!p._tr) p._tr = sinTilde([p.nombre, p.marca, ...(p.tags || []), ...Object.values(p.specs || {})].join(' '));
+  return p._tr;
+}
+function cumpleRegla(p, r) {
+  if (r.c && !r.c.includes(p.categoria)) return false;
+  if (r.s && !r.s.includes(p.subcategoria)) return false;
+  if (r.m && !r.m.includes(p.marca)) return false;
+  if (r.n) { r._re = r._re || new RegExp(r.n, 'i'); if (!r._re.test(textoRegla(p))) return false; }
+  return true;
+}
+const enSub = (p, sub) => sub.r.some(r => cumpleRegla(p, r));
+const enGrupo = (p, g) => g.subs.some(s => enSub(p, s));
+const grupoActual = () => EF_GRUPOS.find(g => g.id === estado.grupo);
+function icono(k) {
+  return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${EF_ICONOS[k] || EF_ICONOS.todo}</svg>`;
+}
+function pintarNavCats() {
+  const cont = $('#ef-cats');
+  if (!cont) return;
+  const base = aplicar(EF.productos, 'grupo');
+  const g = grupoActual();
+  const btn = (id, t, ic, n) => `
+    <button class="efc-btn ${estado.grupo === id ? 'activo' : ''}" data-grupo="${id}" aria-pressed="${estado.grupo === id}">
+      <span class="efc-ic">${icono(ic)}</span>
+      <span class="efc-t">${esc(t)}</span>
+      <span class="efc-n">${n}</span>
+    </button>`;
+  const botones = btn('', 'Todo', 'todo', base.length) +
+    EF_GRUPOS.map(x => btn(x.id, x.t, x.ic, base.filter(p => enGrupo(p, x)).length)).join('');
+  let subs = '';
+  if (g) {
+    const enG = base.filter(p => enGrupo(p, g));
+    const items = g.subs.map((s, i) => ({ s, i, n: enG.filter(p => enSub(p, s)).length })).filter(x => x.n || estado.sub === x.i);
+    subs = `<button class="efc-sub ${estado.sub < 0 ? 'activo' : ''}" data-sub="-1" style="--i:0">Todo en ${esc(g.t)} <b>${enG.length}</b></button>` +
+      items.map((x, k) => `<button class="efc-sub ${estado.sub === x.i ? 'activo' : ''}" data-sub="${x.i}" style="--i:${k + 1}">${esc(x.s.t)} <b>${x.n}</b></button>`).join('');
+  }
+  const anterior = cont.dataset.grupo;
+  const cambio = anterior !== estado.grupo;
+  const filaScroll = cont.querySelector('.efc-fila')?.scrollLeft || 0;
+  cont.innerHTML = `
+    <div class="efc-fila" role="toolbar" aria-label="Categorías">${botones}</div>
+    <div class="efc-panel ${g ? 'abierto' : ''} ${cambio ? 'nuevo' : ''}"><div class="efc-panel-in">${subs}</div></div>`;
+  cont.dataset.grupo = estado.grupo;
+  const fila = cont.querySelector('.efc-fila');
+  fila.scrollLeft = filaScroll;
+  if (cambio) {
+    const act = cont.querySelector('.efc-btn.activo');
+    if (act && window.innerWidth < 900) {
+      const x = act.offsetLeft - (fila.clientWidth - act.offsetWidth) / 2;
+      fila.scrollTo({ left: x, behavior: 'smooth' });
+    }
+  }
+}
 // Filtra ignorando una faceta, para poder contar sus opciones disponibles
 function aplicar(productos, omitir) {
   const q = estado.q.trim().toLowerCase();
@@ -184,6 +260,10 @@ function aplicar(productos, omitir) {
     if (omitir !== 'categoria' && estado.categorias.length && !estado.categorias.includes(p.categoria)) return false;
     if (omitir !== 'subcategoria' && estado.subcategorias.length && !estado.subcategorias.includes(p.subcategoria)) return false;
     if (omitir !== 'marca' && estado.marcas.length && !estado.marcas.includes(p.marca)) return false;
+    if (omitir !== 'grupo' && estado.grupo) {
+      const g = grupoActual();
+      if (g && !(estado.sub >= 0 ? enSub(p, g.subs[estado.sub]) : enGrupo(p, g))) return false;
+    }
     if (q) {
       const blob = [p.nombre, p.marca, p.subcategoria, p.categoria, p.sku, ...(p.tags || [])].join(' ').toLowerCase();
       if (!q.split(/\s+/).every(t => blob.includes(t))) return false;
@@ -225,6 +305,8 @@ function pintarChips() {
     ...estado.subcategorias.map(v => ['subcategoria', v]),
     ...estado.marcas.map(v => ['marca', v])
   ];
+  const gA = grupoActual();
+  if (gA) activos.unshift(estado.sub >= 0 ? ['sub', gA.t + ' · ' + gA.subs[estado.sub].t] : ['grupo', gA.t]);
   if (estado.q) activos.unshift(['q', estado.q]);
   if (estado.soloDisponibles) activos.push(['disponibles', 'Solo disponibles']);
   cont.innerHTML = activos.map(([c, v]) =>
@@ -239,23 +321,48 @@ function filtrar() {
   if (estado.orden === 'relevancia')  l.sort((a, b) => (b.imagen ? 1 : 0) - (a.imagen ? 1 : 0));
   return l;
 }
+/* Se pinta por tandas para que el celular no cargue 600 tarjetas de golpe */
+const TANDA = () => window.innerWidth < 600 ? 20 : window.innerWidth < 1200 ? 24 : 30;
+let listaActual = [], pintados = 0, observadorMas = null;
+function pintarTanda() {
+  const cont = $('#grid-catalogo');
+  const hasta = Math.min(listaActual.length, pintados + TANDA());
+  cont.insertAdjacentHTML('beforeend', listaActual.slice(pintados, hasta).map(cardProducto).join(''));
+  pintados = hasta;
+  const mas = $('#ver-mas-cat');
+  if (mas) {
+    const faltan = listaActual.length - pintados;
+    mas.hidden = faltan <= 0;
+    mas.innerHTML = `Ver más productos <span>${faltan} restantes</span>`;
+  }
+}
 function pintarCatalogo() {
   const cont = $('#grid-catalogo');
   if (!cont) return;
   const l = filtrar();
+  listaActual = l; pintados = 0;
   $('#conteo').textContent = `${l.length} de ${EF.productos.length} referencias`;
-  cont.innerHTML = l.length ? l.map(cardProducto).join('')
-    : `<div class="vacio" style="grid-column:1/-1">
+  cont.innerHTML = '';
+  if (l.length) pintarTanda();
+  else {
+    cont.innerHTML = `<div class="vacio" style="grid-column:1/-1">
          <h3>Sin resultados para esa búsqueda</h3>
          <p>Prueba con el nombre del equipo (ej. «Redmi Note 13»), la marca o el código SKU.</p>
        </div>`;
+    const mas = $('#ver-mas-cat'); if (mas) mas.hidden = true;
+  }
+  if (!observadorMas && 'IntersectionObserver' in window && $('#ver-mas-cat')) {
+    observadorMas = new IntersectionObserver(es => { if (es[0].isIntersecting && pintados && pintados < listaActual.length) pintarTanda(); }, { rootMargin: '500px 0px' });
+    observadorMas.observe($('#ver-mas-cat'));
+  }
+  pintarNavCats();
   pintarFiltros();
   pintarChips();
   $$('.cat[data-ir-cat]').forEach(b =>
     b.classList.toggle('activa', estado.categorias.includes(b.dataset.irCat)));
 }
 function irAlCatalogo({ cat, sub, marca, q } = {}) {
-  Object.assign(estado, { categorias: [], subcategorias: [], marcas: [], q: '', soloDisponibles: false });
+  Object.assign(estado, { categorias: [], subcategorias: [], marcas: [], q: '', soloDisponibles: false, grupo: '', sub: -1 });
   if (cat) estado.categorias = [cat];
   if (sub) estado.subcategorias = [sub];
   if (marca) estado.marcas = [marca];
@@ -802,6 +909,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (quitar) {
       const { quitar: campo, valor } = quitar.dataset;
       if (campo === 'q') estado.q = '', $('#buscar').value = '';
+      else if (campo === 'grupo') { estado.grupo = ''; estado.sub = -1; }
+      else if (campo === 'sub') estado.sub = -1;
       else if (campo === 'disponibles') estado.soloDisponibles = false;
       else {
         const clave = campo === 'categoria' ? 'categorias' : campo === 'marca' ? 'marcas' : 'subcategorias';
@@ -847,9 +956,29 @@ document.addEventListener('DOMContentLoaded', async () => {
       navigator.clipboard?.writeText($('#ok-clave').textContent);
       return toast('Clave copiada');
     }
-    if (t.closest('#toggle-filtros'))  return $('#filtros').classList.toggle('abierto');
+    const gBtn = t.closest('.efc-btn[data-grupo]');
+    if (gBtn) {
+      const id = gBtn.dataset.grupo;
+      estado.grupo = estado.grupo === id ? '' : id;
+      estado.sub = -1; estado.categorias = []; estado.subcategorias = [];
+      return pintarCatalogo();
+    }
+    const sBtn = t.closest('.efc-sub[data-sub]');
+    if (sBtn) {
+      const i = Number(sBtn.dataset.sub);
+      estado.sub = estado.sub === i ? -1 : i;
+      return pintarCatalogo();
+    }
+    if (t.closest('#ver-mas-cat')) return pintarTanda();
+    if (t.closest('#toggle-filtros')) {
+      const b = t.closest('#toggle-filtros');
+      const ab = $('#filtros').classList.toggle('abierto');
+      b.setAttribute('aria-expanded', ab);
+      b.classList.toggle('activo', ab);
+      return;
+    }
     if (t.closest('#limpiar-filtros')) {
-      Object.assign(estado, { categorias: [], subcategorias: [], marcas: [], soloDisponibles: false });
+      Object.assign(estado, { categorias: [], subcategorias: [], marcas: [], soloDisponibles: false, grupo: '', sub: -1 });
       return pintarCatalogo();
     }
     if (t.closest('#ia-btn'))     return abrirIA(true);

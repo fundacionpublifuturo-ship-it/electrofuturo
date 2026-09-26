@@ -1219,3 +1219,216 @@ body::before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;opa
   .pill-nav,.nav-ic,.btn-admin,.nav-puntos .punto{transition:none}
   .pill-nav:hover,.nav-ic:hover,.btn-admin:hover{transform:none}
 }
+
+/* ============================================================
+   v11 — Catálogo PRO
+   Botones de categorías con subcategorías desplegables, cuadrícula
+   compacta (5 · 4 · 3 · 2 columnas), carga por tandas y versión
+   celular más liviana. Todo lo nuevo vive debajo de esta línea.
+   ============================================================ */
+.catalogo-pro{padding:22px 24px 80px}
+.cat-header{padding:40px 0 26px}
+.cat-header h2{font-size:clamp(1.6rem,3vw,2.2rem)}
+.cat-header .buscador{margin-top:18px}
+
+.anuncio .msj{padding:0 !important;max-width:none !important;border-radius:0 !important;background:none !important;border:0 !important}
+
+/* ---------- Botones principales ---------- */
+.efc{margin-bottom:18px}
+.efc-fila{display:grid;grid-template-columns:repeat(11,minmax(0,1fr));gap:10px}
+.efc-btn{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:7px;
+  padding:14px 6px 12px;border-radius:18px;border:1.5px solid var(--linea);background:#fff;color:var(--grafito);
+  cursor:pointer;isolation:isolate;overflow:hidden;text-align:center;
+  transition:transform .28s var(--ease),border-color .25s,box-shadow .28s var(--ease),color .25s}
+.efc-btn::before{content:"";position:absolute;inset:0;z-index:-1;opacity:0;
+  background:linear-gradient(120deg,#0B7C8C,#19C1D6 35%,#6FE3F0 50%,#19C1D6 65%,#0E93A5);
+  background-size:260% 100%;transition:opacity .35s var(--ease)}
+.efc-btn:hover{transform:translateY(-3px);border-color:var(--cian);box-shadow:0 10px 24px rgba(25,193,214,.18)}
+.efc-btn:active{transform:translateY(-1px) scale(.97)}
+.efc-btn:focus-visible{outline:2px solid var(--cian);outline-offset:3px}
+.efc-ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+  background:var(--cian-brisa);color:var(--cian-hondo);transition:transform .35s var(--ease),background .3s,color .3s}
+.efc-btn:hover .efc-ic{transform:rotate(-6deg) scale(1.08)}
+.efc-t{font-weight:600;font-size:.8rem;line-height:1.2;letter-spacing:-.01em}
+.efc-n{font-family:var(--mono);font-size:.6rem;color:var(--gris-suave);letter-spacing:.05em}
+.efc-btn.activo{color:#fff;border-color:transparent;box-shadow:0 12px 30px rgba(14,147,165,.35);transform:translateY(-3px)}
+.efc-btn.activo::before{opacity:1;animation:efc-brillo 5s linear infinite}
+.efc-btn.activo .efc-ic{background:rgba(255,255,255,.2);color:#fff;transform:scale(1.06)}
+.efc-btn.activo .efc-n{color:rgba(255,255,255,.85)}
+@keyframes efc-brillo{0%{background-position:100% 0}100%{background-position:-160% 0}}
+
+/* ---------- Panel de subcategorías ---------- */
+.efc-panel{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .45s var(--ease),opacity .35s var(--ease),margin .45s var(--ease)}
+.efc-panel.abierto{grid-template-rows:1fr;opacity:1;margin-top:12px}
+.efc-panel-in{overflow:hidden;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start}
+.efc-panel.abierto .efc-panel-in{padding:14px;border-radius:18px;background:linear-gradient(135deg,#fff,var(--cian-brisa));
+  border:1px solid rgba(25,193,214,.28)}
+.efc-sub{display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:100px;cursor:pointer;
+  border:1.5px solid var(--linea);background:#fff;color:var(--grafito);font-size:.82rem;font-weight:600;white-space:nowrap;
+  transition:transform .22s var(--ease),border-color .2s,background .2s,color .2s,box-shadow .22s}
+.efc-sub b{font-family:var(--mono);font-size:.62rem;font-weight:500;color:var(--gris-suave);
+  background:var(--niebla);padding:2px 7px;border-radius:100px;transition:.2s}
+.efc-sub:hover{border-color:var(--cian);color:var(--cian-hondo);transform:translateY(-2px);box-shadow:0 6px 16px rgba(25,193,214,.16)}
+.efc-sub.activo{background:var(--tinta);border-color:var(--tinta);color:#fff;box-shadow:0 8px 20px rgba(27,33,38,.22)}
+.efc-sub.activo b{background:rgba(255,255,255,.16);color:#fff}
+.efc-panel.nuevo .efc-sub{animation:efc-entra .42s var(--ease) backwards;animation-delay:calc(var(--i) * 38ms + 80ms)}
+@keyframes efc-entra{from{opacity:0;transform:translateY(10px) scale(.94)}to{opacity:1;transform:none}}
+
+/* ---------- Barra de resultados y filtros ---------- */
+.catalogo-pro .resultados-bar{margin-bottom:12px;flex-wrap:wrap}
+.rb-acciones{display:flex;gap:8px;align-items:center}
+.btn-filtros{display:inline-flex !important;align-items:center;gap:7px;padding:9px 15px;border-radius:100px;
+  border:1px solid var(--linea);background:#fff;color:var(--grafito);font-size:.8rem;font-weight:600;cursor:pointer;transition:.2s}
+.btn-filtros:hover,.btn-filtros.activo{border-color:var(--cian);color:var(--cian-hondo);background:var(--cian-brisa)}
+.catalogo-pro .filtros{position:static;display:none;max-height:none;margin-bottom:14px;
+  grid-template-columns:2fr 1fr;gap:10px 26px;animation:efc-entra .35s var(--ease)}
+.catalogo-pro .filtros.abierto{display:grid}
+.catalogo-pro .filtros .filtro-bloque{margin:0}
+.catalogo-pro #f-marcas{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0 14px}
+.catalogo-pro #f-marcas .ver-mas{grid-column:1/-1;justify-self:start}
+.catalogo-pro .filtros-limpiar{margin-top:14px}
+
+/* ---------- Cuadrícula compacta ---------- */
+.catalogo-pro .grid-catalogo{grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+.catalogo-pro .prod{border-radius:16px}
+.catalogo-pro .prod:hover{transform:translateY(-3px)}
+.catalogo-pro .prod-foto,.catalogo-pro .prod-ficha{aspect-ratio:1/1}
+.catalogo-pro .prod-foto img{padding:8px}
+.catalogo-pro .prod .etiqueta{top:8px;left:8px;font-size:.5rem;padding:3px 7px}
+.catalogo-pro .prod .lupa{width:28px;height:28px;bottom:8px;right:8px}
+.catalogo-pro .prod-cuerpo{padding:10px 12px 12px}
+.catalogo-pro .prod .sku{font-size:.54rem}
+.catalogo-pro .prod h3{font-size:.8rem;line-height:1.3;margin:4px 0 3px;display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden;min-height:2.6em}
+.catalogo-pro .prod .marca-p{font-size:.66rem;margin:0 0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.catalogo-pro .prod .pie{margin-bottom:8px;padding-top:8px}
+.catalogo-pro .precio{font-size:1rem}
+.catalogo-pro .precio small{font-size:.48rem}
+.catalogo-pro .prod-acciones{grid-template-columns:1fr 1fr;gap:6px}
+.catalogo-pro .prod-acciones .add,.catalogo-pro .prod-acciones .comprar{height:32px;border-radius:9px;font-size:.72rem;padding:0 4px;white-space:nowrap}
+.catalogo-pro .prod-acciones .badge-agotado{padding:7px 0;font-size:.7rem}
+.catalogo-pro .prod-ficha{padding:14px}
+.catalogo-pro .prod-ficha .modelo{font-size:.84rem}
+.catalogo-pro .prod-ficha .sello{font-size:2.2rem}
+.ver-mas-cat{display:flex;align-items:center;gap:10px;margin:26px auto 0;padding:13px 26px;border-radius:100px;
+  border:1.5px solid var(--linea);background:#fff;color:var(--grafito);font-weight:600;font-size:.86rem;cursor:pointer;
+  transition:.22s var(--ease)}
+.ver-mas-cat span{font-family:var(--mono);font-size:.64rem;color:var(--gris-suave)}
+.ver-mas-cat:hover{border-color:var(--cian);color:var(--cian-hondo);transform:translateY(-2px)}
+.ver-mas-cat[hidden]{display:none}
+
+@media (max-width:1199px){
+  .efc-fila{display:flex;overflow-x:auto;scroll-snap-type:x proximity;scrollbar-width:none;padding:4px 2px 10px;margin:0 -2px}
+  .efc-fila::-webkit-scrollbar{display:none}
+  .efc-btn{flex:0 0 104px;scroll-snap-align:start}
+  .catalogo-pro .grid-catalogo{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (max-width:899px){
+  .catalogo-pro .grid-catalogo{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .catalogo-pro .filtros{grid-template-columns:1fr}
+}
+
+/* ============================================================
+   Celular
+   ============================================================ */
+@media (max-width:600px){
+  /* Barra de anuncio: una sola línea delgada */
+  .anuncio .wrap{grid-template-columns:1fr 24px !important;padding:4px 8px 4px 12px !important;gap:6px;font-size:.68rem !important;min-height:0 !important;height:auto !important}
+  .anuncio .centro-msj{flex-wrap:nowrap !important;gap:8px;min-width:0;overflow:hidden;justify-content:flex-start}
+  .anuncio .msj{white-space:nowrap !important;overflow:hidden;text-overflow:ellipsis;min-width:0;display:block !important}
+  .anuncio .msj>span{display:inline}
+  .anuncio,.anuncio .msj,.anuncio .msj *,.anuncio a{font-size:.68rem !important;line-height:1.35 !important}
+  .anuncio .solo-desktop{display:none !important}
+  .anuncio a{margin:0 !important;flex:0 0 auto;font-size:.66rem;padding:0;border:0}
+  .anuncio .cerrar{width:22px;height:22px;font-size:.95rem;align-self:center !important}
+
+  /* Barra de navegación más compacta */
+  .nav-top{padding:7px 12px 0;gap:6px}
+  .nav-top .logo img{height:19px}
+  .nav-ic{width:34px;height:34px;flex-basis:34px}
+  .nav-ic svg{width:16px;height:16px}
+  .btn-admin{width:34px;min-height:34px}
+  .btn-admin svg{width:16px;height:16px}
+  .nav-pills{padding:7px 12px 7px;gap:6px}
+  .pill-nav{padding:7px 12px;min-height:34px;font-size:.76rem;gap:6px;border-width:1px}
+  .pill-nav svg{width:14px;height:14px;flex-basis:14px}
+  .nav-puntos{padding-bottom:6px}
+
+  /* Textos y secciones más livianos */
+  .wrap{padding:0 12px}
+  .seccion{padding:38px 0}
+  .seccion-head h2{font-size:1.38rem}
+  .eyebrow{font-size:.58rem;letter-spacing:.18em}
+  .hero .wrap{padding-top:30px;padding-bottom:28px;gap:20px}
+  .hero h1{font-size:1.9rem;margin-bottom:12px}
+  .hero .lead{font-size:.86rem;margin-bottom:16px}
+  .hero-buscar input{padding:12px 44px 12px 16px;font-size:.86rem}
+  .btn{padding:11px 18px;font-size:.82rem}
+  .franja-item{padding:12px 12px;min-height:0;gap:9px}
+  .franja-item b{font-size:.76rem}
+  .franja-item span{font-size:.66rem}
+
+  /* Catálogo */
+  .cat-header{padding:18px 0 12px}
+  .cat-header h2{font-size:1.32rem}
+  .cat-header .cat-sub{display:none}
+  .cat-header .buscador{margin-top:12px}
+  .buscador input{padding:11px 16px;font-size:.85rem}
+  .catalogo-pro{padding:12px 12px 60px}
+  .efc{margin:0 -12px 12px}
+  .efc-fila{gap:7px;padding:2px 12px 8px;margin:0}
+  .efc-btn{flex:0 0 78px;padding:10px 4px 8px;gap:5px;border-radius:15px;border-width:1px}
+  .efc-ic{width:36px;height:36px;border-radius:11px}
+  .efc-ic svg{width:19px;height:19px}
+  .efc-t{font-size:.66rem}
+  .efc-n{font-size:.54rem}
+  .efc-panel{margin-left:12px;margin-right:12px}
+  .efc-panel.abierto{margin-top:6px}
+  .efc-panel.abierto .efc-panel-in{padding:10px;gap:6px;border-radius:14px}
+  .efc-sub{padding:7px 11px;font-size:.72rem;gap:6px;border-width:1px}
+  .efc-sub b{font-size:.56rem;padding:1px 6px}
+  .catalogo-pro .resultados-bar{gap:8px;margin-bottom:10px}
+  .catalogo-pro .resultados-bar .conteo{font-size:.64rem}
+  .btn-filtros{padding:7px 11px;font-size:.72rem}
+  .catalogo-pro .resultados-bar select{padding:7px 10px;font-size:.72rem;max-width:150px}
+  .catalogo-pro .filtros{padding:14px}
+  .catalogo-pro #f-marcas{grid-template-columns:1fr 1fr}
+  .chip{font-size:.7rem;padding:4px 6px 4px 10px}
+
+  .catalogo-pro .grid-catalogo{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .catalogo-pro .prod{border-radius:13px}
+  .catalogo-pro .prod:hover{transform:none}
+  .catalogo-pro .prod-foto img{padding:6px}
+  .catalogo-pro .prod .lupa{display:none}
+  .catalogo-pro .prod .etiqueta{font-size:.46rem;top:6px;left:6px;padding:2px 6px}
+  .catalogo-pro .prod-cuerpo{padding:8px 9px 9px}
+  .catalogo-pro .prod .sku{font-size:.5rem}
+  .catalogo-pro .prod h3{font-size:.74rem;margin:3px 0 2px}
+  .catalogo-pro .prod .marca-p{font-size:.6rem;margin-bottom:6px}
+  .catalogo-pro .prod .pie{margin-bottom:6px;padding-top:6px}
+  .catalogo-pro .precio{font-size:.92rem}
+  .catalogo-pro .prod-acciones{grid-template-columns:1fr 1fr;gap:5px}
+  .catalogo-pro .prod-acciones .add,.catalogo-pro .prod-acciones .comprar{height:30px;font-size:.66rem;border-radius:8px}
+  .catalogo-pro .prod-ficha{padding:10px}
+  .catalogo-pro .prod-ficha .equipo{font-size:.5rem}
+  .catalogo-pro .prod-ficha .modelo{font-size:.74rem}
+  .catalogo-pro .prod-ficha .mod{font-size:.46rem;padding:2px 5px}
+  .catalogo-pro .prod-ficha .sello{font-size:1.6rem}
+  .ver-mas-cat{padding:11px 20px;font-size:.8rem}
+
+  /* Destacados del inicio con la misma tarjeta compacta */
+  .grid-prod{gap:8px}
+  .grid-prod .prod-cuerpo{padding:8px 9px 9px}
+  .grid-prod .prod h3{font-size:.74rem}
+  .grid-prod .prod-acciones{grid-template-columns:1fr 1fr;gap:5px}
+  .grid-prod .prod-acciones .add,.grid-prod .prod-acciones .comprar{height:30px;font-size:.66rem;border-radius:8px}
+}
+@media (max-width:360px){
+  .catalogo-pro .prod-acciones,.grid-prod .prod-acciones{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){
+  .efc-btn.activo::before,.efc-panel.nuevo .efc-sub{animation:none}
+  .efc-panel{transition:none}
+}
+/* El asesor anterior queda reemplazado por assets/js/asistente-ia.js */
+.ia-btn,#ia-btn,.ia-panel,#ia-panel{display:none !important}
