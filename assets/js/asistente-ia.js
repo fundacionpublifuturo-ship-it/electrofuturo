@@ -1,14 +1,14 @@
-/* Asesor IA de Electro Futuro — widget independiente.
+/* Asesor de Electro Futuro — widget independiente y GRATIS (no usa IA de pago).
    Se carga con: <script src="assets/js/asistente-ia.js?v=11" defer></script> antes de </body>.
-   No depende de app.js. Usa /api/asistente (Claude) y, si no hay conexión o clave,
-   responde buscando en window.EF_PRODUCTOS para que el chat nunca quede mudo. */
+   Responde preguntas frecuentes (ubicación, horario, envíos, pagos, garantía, cursos…)
+   y busca en window.EF_PRODUCTOS entendiendo tipo de producto, marca, compatibilidad,
+   potencia, capacidad y presupuesto. Recuerda el contexto de la conversación. */
 (function () {
   'use strict';
   if (window.__efAsesor) return; window.__efAsesor = true;
 
-  var API = '/api/asistente';
   var WA = '573134135751';
-  var CLAVE = 'ef_asesor_chat_v1';
+  var CLAVE = 'ef_asesor_chat_v2';
   var SECCION_TEXTO = {
     'catalogo': ['catalogo', 'ver catalogo', 'tienda'],
     'cotizar': ['cotizar', 'cotizacion'],
@@ -18,7 +18,7 @@
     'preguntas': ['preguntas', 'preguntas frecuentes', 'faq'],
     'ubicacion': ['ubicacion', 'donde estamos', 'contacto']
   };
-  var SUGERENCIAS = ['Cargador rápido para iPhone', 'Power bank de 20.000 mAh', 'Pantalla para Redmi 13C', 'Curso de servicio técnico'];
+  var SUGERENCIAS = ['Cargador para iPhone', 'Audífonos bluetooth baratos', 'Power bank de 20000', 'Pantalla Redmi 13C', '¿Hacen envíos?', '¿Dónde están?'];
 
   var css = [
     '.efa-root{--efa-tinta:#1B2126;--efa-cian:#19C1D6;--efa-cian-p:#0E93A5;--efa-gris:#5B6770;--efa-linea:#E3E8EB;--efa-fondo:#F6F8F9;--efa-blanco:#fff;font-family:Inter,Poppins,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--efa-tinta)}',
@@ -81,9 +81,9 @@
   var productos = function () { return Array.isArray(window.EF_PRODUCTOS) ? window.EF_PRODUCTOS : []; };
   var porSku = function (sku) { return productos().find(function (p) { return p.sku === sku; }); };
 
-  var estado = { mensajes: [], ocupado: false };
-  try { var g = JSON.parse(sessionStorage.getItem(CLAVE) || 'null'); if (g && Array.isArray(g.mensajes)) estado.mensajes = g.mensajes.slice(-20); } catch (e) {}
-  function guardar() { try { sessionStorage.setItem(CLAVE, JSON.stringify({ mensajes: estado.mensajes.slice(-20) })); } catch (e) {} }
+  var estado = { mensajes: [], ocupado: false, ctx: {} };
+  try { var g = JSON.parse(sessionStorage.getItem(CLAVE) || 'null'); if (g && Array.isArray(g.mensajes)) { estado.mensajes = g.mensajes.slice(-20); estado.ctx = g.ctx || {}; } } catch (e) {}
+  function guardar() { try { sessionStorage.setItem(CLAVE, JSON.stringify({ mensajes: estado.mensajes.slice(-20), ctx: estado.ctx })); } catch (e) {} }
 
   /* ---------- Interfaz ---------- */
   var root, msgs, input, enviarBtn, fab;
@@ -181,7 +181,7 @@
     msgs.scrollTop = msgs.scrollHeight;
   }
 
-  /* ---------- Conversación ---------- */
+  /* ---------- Conversación (motor local, sin IA de pago) ---------- */
   function enviar(texto) {
     texto = String(texto || '').trim();
     if (!texto || estado.ocupado) return;
@@ -191,50 +191,324 @@
     estado.ocupado = true; enviarBtn.disabled = true;
     var esc = document.createElement('div'); esc.className = 'efa-escr'; esc.innerHTML = '<i></i><i></i><i></i>'; msgs.appendChild(esc);
     msgs.scrollTop = msgs.scrollHeight;
+    setTimeout(function () {
+      var d;
+      try { d = responder(texto); } catch (e) { d = noEntendi(); }
+      esc.remove();
+      var m = { role: 'assistant', content: d.respuesta, botones: d.botones || [] };
+      estado.mensajes.push(m); guardar();
+      burbuja(m.content, 'bot'); pintarBotones(m.botones);
+      msgs.scrollTop = msgs.scrollHeight;
+      estado.ocupado = false; enviarBtn.disabled = false; input.focus();
+    }, 450);
+  }
 
-    var historial = estado.mensajes.slice(-10).map(function (m) { return { role: m.role, content: m.content }; });
-    var ctrl = window.AbortController ? new AbortController() : null;
-    var t = setTimeout(function () { if (ctrl) ctrl.abort(); }, 25000);
+  /* ===== Datos del negocio ===== */
+  var N = {
+    dir: 'Cra. 6 #18-49, Local 3, Edificio Belvedere, Ibagué (Tolima)',
+    horario: 'lunes a viernes de 8:00 a. m. a 6:00 p. m. y sábados de 8:00 a. m. a 2:00 p. m.',
+    wa: '313 413 5751'
+  };
+  var B = {
+    wa: function (t, msg) { return { texto: t || 'Escribir por WhatsApp', accion: 'whatsapp', valor: msg || 'Hola, vengo de la página web' }; },
+    sec: function (t, v) { return { texto: t, accion: 'seccion', valor: v }; },
+    cat: function (t, v) { return { texto: t, accion: 'categoria', valor: v }; },
+    prod: function (p) { return { texto: 'Ver ' + corto(p), accion: 'producto', valor: p.sku }; }
+  };
+  function corto(p) {
+    var ref = p.specs && p.specs.Referencia;
+    var base = p.nombre.split('(')[0].trim();
+    if (ref && base.length > 22) return (p.marca && p.marca.indexOf('Genérico') < 0 ? p.marca + ' ' : '') + ref;
+    return base.length > 30 ? base.slice(0, 28) + '…' : base;
+  }
 
-    fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mensajes: historial }), signal: ctrl ? ctrl.signal : undefined })
-      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(function (d) {
-        if (d.respaldo) { var loc = respuestaLocal(texto); if (loc.encontrado) return loc; }
-        return d;
-      })
-      .catch(function () { return respuestaLocal(texto); })
-      .then(function (d) {
-        clearTimeout(t); esc.remove();
-        var m = { role: 'assistant', content: d.respuesta || 'No encontré una respuesta. Escríbenos por WhatsApp y te ayudamos.', botones: d.botones || [] };
-        estado.mensajes.push(m); guardar();
-        burbuja(m.content, 'bot'); pintarBotones(m.botones);
-        msgs.scrollTop = msgs.scrollHeight;
-        estado.ocupado = false; enviarBtn.disabled = false; input.focus();
+  /* ===== Normalización ===== */
+  function limpiar(s) {
+    s = norm(s).replace(/(\d)\.(\d{3})/g, '$1$2').replace(/(\d)\.(\d{3})/g, '$1$2');
+    var fix = [
+      [/\bcargado(r)?s?\b/g, 'cargador'], [/\bcargadores\b/g, 'cargador'], [/\baudifono(s)?\b|\baudifonos\b|\baudio?fonos?\b|\bauriculares?\b|\bcascos?\b/g, 'audifonos'],
+      [/\bi ?phone\b|\bayfon\b|\biphon\b|\baifon\b/g, 'iphone'], [/\bsamsum\b|\bsansung\b|\bsamgsung\b|\bsamnsung\b/g, 'samsung'],
+      [/\bxiomi\b|\bshaomi\b|\bxaomi\b|\bxiami\b|\bchaomi\b/g, 'xiaomi'], [/\bpower ?banks?\b|\bpowerbanks?\b|\bpawer ?bank\b|\bbaterias? externas?\b|\bbanco de (energia|bateria)\b|\bcargador(es)? portatil(es)?\b|\bpila portatil\b/g, 'powerbank'],
+      [/\bsmart ?watch(es)?\b|\bsmartwach\b|\brelojes?\b|\bsmart ?band\b|\bmanillas? inteligentes?\b|\bwatch\b|\bband\b/g, 'reloj'],
+      [/\btipo c\b|\btype ?c\b|\busb ?c\b|\busb-c\b/g, 'tipoc'], [/\bmicro ?usb\b|\bv8\b/g, 'v8'], [/\blightning\b|\blighting\b|\blaitning\b/g, 'lightning'],
+      [/\bbafles?\b|\bcabinas?\b|\baltavoz\b|\baltavoces\b|\bparlantes\b|\bbocinas?\b/g, 'parlante'], [/\bdisplay\b|\bvisor(es)?\b|\blcd\b|\bmodulos?\b|\bpantallas\b/g, 'pantalla'],
+      [/\bforros?\b|\bfundas?\b|\bestuches?\b|\bcarcasas?\b|\bcases\b/g, 'case'], [/\bmicas?\b|\bvidrios? templados?\b|\blaminas?\b|\bprotector(es)? de pantalla\b/g, 'hidrogel'],
+      [/\bbaterias\b|\bpilas?\b/g, 'bateria'], [/\bmultitomas?\b|\bregletas?\b|\btomacorrientes?\b|\bextension electrica\b/g, 'multitoma'],
+      [/\braton\b|\bmouses\b/g, 'mouse'], [/\bteclados\b/g, 'teclado'], [/\bdiademas\b/g, 'diadema'], [/\bcables\b/g, 'cable'], [/\bholders?\b|\bsoportes\b|\bbases? para (el )?carro\b/g, 'soporte'],
+      [/\bpalo(s)? de selfie\b|\bpalo(s)? selfie\b|\bselfie stick\b/g, 'selfie'], [/\bmanos libres\b|\bmanoslibres\b/g, 'manoslibres'], [/\bcamaras?\b/g, 'camara'],
+      [/\bmicrofonos?\b|\bmicros?\b/g, 'microfono'], [/\bcarro\b|\bauto\b|\bvehiculo\b|\bcoche\b/g, 'carro'], [/\bmotos?\b|\bmotocicleta\b/g, 'moto']
+    ];
+    s = s.replace(/(\d+(?:\.\d+)?)\s*(metros?|mts?|mt)\b/g, '$1m');
+    fix.forEach(function (f) { s = s.replace(f[0], f[1]); });
+    return s.replace(/\s+/g, ' ').trim();
+  }
+  function textoProd(p) {
+    if (!p._t) p._t = limpiar([p.nombre, p.marca, p.categoria, p.subcategoria, (p.tags || []).join(' '), Object.keys(p.specs || {}).map(function (k) { return p.specs[k]; }).join(' ')].join(' '));
+    return p._t;
+  }
+  function nombreProd(p) { if (!p._n) p._n = limpiar(p.nombre + ' ' + (p.specs && p.specs.Referencia || '')); return p._n; }
+  function catProd(p) { if (!p._c) p._c = limpiar(p.categoria + ' ' + p.subcategoria + ' ' + p.nombre); return p._c; }
+
+  /* ===== Tipos de producto ===== */
+  var TIPOS = [
+    { k: 'powerbank', re: /\bpowerbank\b/, f: function (p) { return /power banks/i.test(p.subcategoria); }, etq: 'power banks' },
+    { k: 'multitoma', re: /\bmultitoma\b/, f: function (p) { return p.subcategoria === 'Tomacorrientes'; }, etq: 'multitomas' },
+    { k: 'cargador_reloj', re: /\bcargador (de |para )?(el )?reloj\b|\bbase (de carga )?(del |para )?reloj\b/, f: function (p) { return p.subcategoria === 'Cargadores para reloj'; }, etq: 'cargadores para reloj' },
+    { k: 'cargador_carro', re: /\bcargador (de |para )?(el )?(carro|moto)\b|\bcarro\b.*\bcargador\b/, f: function (p) { return p.subcategoria === 'Cargadores de carro'; }, etq: 'cargadores para carro y moto' },
+    { k: 'inalambrico', re: /\bcarga(dor)? inalambric[oa]\b|\bmagsafe\b/, f: function (p) { return /inalámbric|magsafe/i.test(p.subcategoria + ' ' + p.nombre); }, etq: 'productos de carga inalámbrica' },
+    { k: 'cargador', re: /\bcargador\b|\badaptador(es)?\b|\bcubo\b/, f: function (p) { return /Cargadores de pared|Adaptadores de viaje/.test(p.subcategoria); }, etq: 'cargadores' },
+    { k: 'auxiliar', re: /\bauxiliar\b|\bcable (de )?audio\b|\bplug\b|\b3\.?5 ?mm\b/, f: function (p) { return p.subcategoria === 'Cables de audio'; }, etq: 'cables de audio' },
+    { k: 'hdmi', re: /\bhdmi\b|\bvga\b|\bcable de red\b|\bethernet\b|\brj45\b/, f: function (p) { return p.categoria === 'Computación' && p.subcategoria === 'Cables'; }, etq: 'cables HDMI, VGA y de red' },
+    { k: 'cable', re: /\bcable\b/, f: function (p) { return p.subcategoria === 'Cables de datos'; }, etq: 'cables de datos' },
+    { k: 'diadema', re: /\bdiadema\b|\bheadset\b|\bover ?ear\b/, f: function (p) { return /diadema/i.test(p.nombre); }, etq: 'diademas' },
+    { k: 'manoslibres', re: /\bmanoslibres\b|\baudifonos (de|con) cable\b|\balambricos\b/, f: function (p) { return p.subcategoria === 'Audífonos con cable'; }, etq: 'audífonos con cable' },
+    { k: 'audifonos', re: /\baudifonos\b|\btws\b|\bearbuds\b/, f: function (p) { return /Audífonos inalámbricos|Audífonos deportivos|Audífonos con cable/.test(p.subcategoria); }, etq: 'audífonos' },
+    { k: 'parlante', re: /\bparlante\b|\bspeaker\b/, f: function (p) { return p.subcategoria === 'Parlantes' || (p.categoria === 'Computación' && /parlante/i.test(p.nombre)); }, etq: 'parlantes' },
+    { k: 'radio', re: /\bradios?\b/, f: function (p) { return p.subcategoria === 'Radios'; }, etq: 'radios' },
+    { k: 'reloj', re: /\breloj\b/, f: function (p) { return p.categoria === 'Smartwatch'; }, etq: 'smartwatch' },
+    { k: 'pulso', re: /\bpulsos?\b|\bcorreas?\b/, f: function (p) { return p.subcategoria === 'Correas y pulsos'; }, etq: 'pulsos y correas' },
+    { k: 'pantalla', re: /\bpantalla\b|\btactil\b|\bdisplay\b/, f: function (p) { return p.categoria === 'Pantallas'; }, etq: 'pantallas' },
+    { k: 'bateria', re: /\bbateria\b/, f: function (p) { return p.categoria === 'Baterías'; }, etq: 'baterías' },
+    { k: 'case', re: /\bcase\b|\bantishock\b|\barmadura\b/, f: function (p) { return p.subcategoria === 'Fundas y cases' && /case|funda|forro/i.test(p.nombre); }, etq: 'cases y forros' },
+    { k: 'hidrogel', re: /\bhidrogel\b|\bantiespia\b|\banti espia\b/, f: function (p) { return p.subcategoria === 'Protección de pantalla'; }, etq: 'protectores de pantalla' },
+    { k: 'popsocket', re: /\bpop ?sockets?\b|\bpopsocket\b|\bventosas?\b/, f: function (p) { return /Pop sockets|Soportes para celular/.test(p.subcategoria); }, etq: 'pop sockets y ventosas' },
+    { k: 'soporte_tv', re: /\bsoporte (de |para )?(el )?(tv|televisor)\b|\bbase (de |para )?tv\b/, f: function (p) { return p.subcategoria === 'Soportes para TV'; }, etq: 'soportes para TV' },
+    { k: 'soporte', re: /\bsoporte\b/, f: function (p) { return /Holders y soportes/.test(p.subcategoria); }, etq: 'holders y soportes' },
+    { k: 'tripode', re: /\btripodes?\b|\bselfie\b|\bestabilizador\b|\bvlog|\bgrabar\b|\bcontenido\b|\btiktok\b|\byoutube|\bcreador(es)?\b|\bpov\b/, f: function (p) { return p.subcategoria === 'Trípodes y fotografía'; }, etq: 'trípodes y accesorios para grabar' },
+    { k: 'luz', re: /\baros? de luz\b|\baro\b|\bluz\b|\blampara\b|\bring light\b/, f: function (p) { return p.subcategoria === 'Iluminación y creadores'; }, etq: 'luces y lámparas' },
+    { k: 'microfono', re: /\bmicrofono\b|\blavalier\b|\bsolapa\b/, f: function (p) { return p.subcategoria === 'Micrófonos'; }, etq: 'micrófonos' },
+    { k: 'teclado', re: /\bteclado\b/, f: function (p) { return p.subcategoria === 'Teclados'; }, etq: 'teclados' },
+    { k: 'mouse', re: /\bmouse\b/, f: function (p) { return p.subcategoria === 'Mouse'; }, etq: 'mouse' },
+    { k: 'pad', re: /\bpad\b|\bmouse ?pad\b|\btapete\b/, f: function (p) { return p.subcategoria === 'Pad Mouse'; }, etq: 'pad mouse' },
+    { k: 'hub', re: /\bhub\b|\botg\b|\bmultiplicador\b|\bmultipuerto\b/, f: function (p) { return p.subcategoria === 'Hubs y OTG'; }, etq: 'hubs y OTG' },
+    { k: 'wifi', re: /\bwifi\b|\bwi-fi\b|\bbluetooth usb\b|\brepetidor\b|\bantena\b|\bdongle\b/, f: function (p) { return /Conectividad/.test(p.subcategoria); }, etq: 'adaptadores WiFi y conectividad' },
+    { k: 'camara', re: /\bcamara\b|\bweb ?cam\b/, f: function (p) { return /Cámaras/.test(p.subcategoria); }, etq: 'cámaras' },
+    { k: 'celular', re: /\bcelular(es)? (basico|sencillo|de teclas)\b|\bflechita\b|\bnokia\b|\balcatel\b|\brompe ?muros\b/, f: function (p) { return p.subcategoria === 'Celulares básicos'; }, etq: 'celulares básicos' },
+    { k: 'tablet', re: /\btablets?\b|\blapiz optico\b|\bstylus\b|\bpencil\b/, f: function (p) { return p.subcategoria === 'Tablets y accesorios'; }, etq: 'tablets y accesorios' },
+    { k: 'base_pc', re: /\bbase refrigerante\b|\bbase (para )?(portatil|laptop|pc)\b|\bmembrana\b/, f: function (p) { return p.subcategoria === 'Bases y protección'; }, etq: 'bases para portátil' },
+    { k: 'maletin', re: /\bmaletin(es)?\b|\bmorral\b|\bbolso (para )?(pc|portatil)\b/, f: function (p) { return p.subcategoria === 'Maletines para PC'; }, etq: 'maletines' },
+    { k: 'hogar', re: /\bventilador\b|\bcompresor\b|\bdispensador\b|\bafeitar\b|\bpatillera\b|\bmaquina de cortar\b|\bgadget/, f: function (p) { return p.subcategoria === 'Hogar y gadgets'; }, etq: 'artículos para el hogar y gadgets' },
+    { k: 'llavero', re: /\bllaveros?\b/, f: function (p) { return p.subcategoria === 'Llaveros'; }, etq: 'llaveros' }
+  ];
+  var CATS = [['cargadores y cables', 'Cargadores y cables'], ['audifonos y parlantes', 'Audífonos y parlantes'], ['accesorios', 'Accesorios'], ['computacion', 'Computación'], ['smartwatch', 'Smartwatch'], ['power bank y tomas', 'Power bank y tomas']];
+
+  var EXPANDE = {
+    iphone: ['iphone', 'ip', 'lightning', 'apple', 'ios'], apple: ['apple', 'iphone', 'lightning'], tipoc: ['tipoc', 'tipo c'], v8: ['v8'],
+    samsung: ['samsung'], xiaomi: ['xiaomi', 'redmi', 'poco'], redmi: ['redmi', 'xiaomi'], motorola: ['motorola', 'moto'], moto: ['moto', 'motorola'],
+    huawei: ['huawei', 'hw', 'honor'], honor: ['honor', 'huawei'], infinix: ['infinix'], tecno: ['tecno', 'spark', 'pova'], oppo: ['oppo'], vivo: ['vivo'],
+    gamer: ['gamer', 'rgb'], original: ['original'], replica: ['replica'], inalambrico: ['inalambric', 'bluetooth', 'tws'], bluetooth: ['bluetooth', 'inalambric'],
+    rapido: ['rapida', 'turbo', 'pd', 'qc'], rapida: ['rapida', 'turbo', 'pd', 'qc'], turbo: ['turbo', 'rapida'], magnetico: ['magnetic', 'magsafe'], ninos: ['infantil', 'ninos', 'kid'], nino: ['infantil', 'ninos', 'kid']
+  };
+  var VACIAS = ('a al del la las lo los con sin para pa pal algo cosa cosas uno algo alguna alguno algun ante bien buen buena buenas buenos busco buscando como con cual cuales cuanto cuanta cuantos cuesta cuestan de del dame deme el ella en entonces es esa ese eso esta este esto estoy favor gracias hay hola los las la le lo me mi mis muy necesito necesitaria nesesito no o para pero podria por porfa porfavor precio precios puede quiero quisiera que se si sirva sirve sirven son su sus tal te tiene tienen tienes tengo tu un una uno unos unas usted vale valen valor venden vende ver y ya tambien opciones opcion alguno otra otro otros otras referencia referencias modelo modelos dispoible disponible disponibles hay tienda ustedes manejan manejas consigo conseguir comprar compro mostrar muestrame muestreme recomienda recomiendame recomiendas recomendacion mejor bueno buenos buenas barato barata baratos baratas economico economica economicos caro cara mas menos hasta maximo mil pesos plata presupuesto').split(' ');
+
+  /* ===== Preguntas frecuentes ===== */
+  var FAQ = [
+    { re: /^(hola|buenas|buenos dias|buenas tardes|buenas noches|hey|ola|saludos|que tal|hi|hello)\b[\s!.?]*$/, r: function () { return { respuesta: '¡Hola! Bienvenido a Electro Futuro. Pregúntame por cualquier producto (cargadores, audífonos, power banks, smartwatch, pantallas, accesorios…), precios, envíos, pagos o cursos.', botones: [B.sec('Ver catálogo', 'catalogo'), B.sec('Ver cursos', 'cursos')] }; } },
+    { re: /\b(gracias|muchas gracias|mil gracias|te agradezco|listo gracias|ok gracias|chevere|excelente|perfecto)\b/, soloCorto: true, r: function () { return { respuesta: 'Con gusto. Si quieres separar o pedir algo, un asesor te atiende por WhatsApp.', botones: [B.wa('Hacer mi pedido', 'Hola, quiero hacer un pedido')] }; } },
+    { re: /\b(chao|adios|hasta luego|nos vemos|bye)\b/, r: function () { return { respuesta: '¡Hasta pronto! Aquí estoy cuando necesites algo.', botones: [] }; } },
+    { re: /\b(donde (estan|queda|quedan|es|ubicados)|direccion|ubicacion|ubicados|local|tienda fisica|como llego|punto de venta|donde los encuentro|en que parte)\b/, r: function () { return { respuesta: 'Estamos en la ' + N.dir + '. Atendemos ' + N.horario + '.', botones: [B.sec('Ver en el mapa', 'ubicacion'), B.wa('Preguntar por WhatsApp', 'Hola, quiero ir al local')] }; } },
+    { re: /\b(horario|hora(s)? (de atencion|abren|cierran)|a que hora|abren|cierran|atienden|abierto|domingo|festivo|sabado)\b/, r: function () { return { respuesta: 'Atendemos ' + N.horario + '. Para domingos y festivos escríbenos antes por WhatsApp.', botones: [B.sec('Ver ubicación', 'ubicacion'), B.wa('Escribir por WhatsApp')] }; } },
+    { re: /\b(whatsapp|wasap|wpp|numero|telefono|celular de ustedes|contacto|contactar|llamar|asesor|hablar con alguien|persona real|humano)\b/, noProducto: true, r: function () { return { respuesta: 'Nuestro WhatsApp es el ' + N.wa + '. Ahí te atiende un asesor para cotizar, separar o confirmar tu pedido.', botones: [B.wa('Abrir WhatsApp', 'Hola, necesito un asesor')] }; } },
+    { re: /\b(envio|envios|envian|mandan|despachan|domicilio|domicilios|llega(n)? a|otra ciudad|bogota|medellin|cali|barranquilla|nacional|transportadora|interrapidisimo|servientrega|coordinadora)\b/, r: function () { return { respuesta: 'Sí, enviamos a toda Colombia y también puedes recoger en el local en Ibagué. El valor y el tiempo del envío dependen de la ciudad: el asesor te los confirma por WhatsApp al cerrar el pedido.', botones: [B.wa('Cotizar envío', 'Hola, quiero cotizar un envío a mi ciudad'), B.sec('Ver catálogo', 'catalogo')] }; } },
+    { re: /\b(pago|pagos|pagar|metodos? de pago|medios? de pago|nequi|daviplata|bancolombia|lulo|bre-?b|llave|transferencia|tarjeta|efectivo|qr|consignacion|contra ?entrega|contraentrega)\b/, r: function () { return { respuesta: 'Puedes pagar por Bancolombia, Lulo Bank o llave Bre-B (el QR aparece al finalizar el pedido en la tienda). También puedes pagar en el local. Para contraentrega u otro medio, confírmalo con el asesor por WhatsApp.', botones: [B.wa('Preguntar por pagos', 'Hola, tengo una pregunta sobre los medios de pago')] }; } },
+    { re: /\b(por mayor|al mayor|mayorista|mayoristas|al por mayor|distribuidor|revender|reventa|precio (de )?mayor|cantidad|docena|lote)\b/, r: function () { return { respuesta: 'Sí, vendemos al detal y al por mayor. Los precios por cantidad te los da el asesor según lo que necesites.', botones: [B.wa('Cotizar al por mayor', 'Hola, quiero precios al por mayor'), B.sec('Cotizar', 'cotizar'), B.sec('Lista de precios', 'lista-precios')] }; } },
+    { re: /\b(garantia|garantias|devolucion|devoluciones|cambio|cambios|salio malo|dano|defectuoso|no funciona|reclamo)\b/, r: function () { return { respuesta: 'Los repuestos de la línea técnica se prueban antes de despacharlos. Si tienes un problema con un producto, puedes radicar la garantía desde "Mi cuenta" con el número de tu pedido, o escribirle al asesor por WhatsApp para revisar tu caso.', botones: [{ texto: 'Ir a Mi cuenta', accion: 'url', valor: 'cuenta.html' }, B.wa('Reportar un problema', 'Hola, necesito ayuda con la garantía de un producto')] }; } },
+    { re: /\b(rastrear|rastreo|seguimiento|mi pedido|estado (de mi|del) pedido|guia|donde va|numero de guia)\b/, r: function () { return { respuesta: 'Puedes rastrear tu pedido en "Mi cuenta": entras con tu WhatsApp o solo con el código del pedido y ves en qué va y el número de guía.', botones: [{ texto: 'Rastrear mi pedido', accion: 'url', valor: 'cuenta.html' }, B.wa('Preguntar por mi pedido', 'Hola, quiero saber el estado de mi pedido')] }; } },
+    { re: /\b(como (compro|comprar|hago (el|un) pedido|pido|hago para comprar)|hacer (un )?pedido|proceso de compra|pedir)\b/, r: function () { return { respuesta: 'Es fácil: agrega los productos al carrito desde el catálogo, llena tus datos y el pedido se confirma por WhatsApp con un asesor, que te dice el total con envío y la forma de pago.', botones: [B.sec('Ir al catálogo', 'catalogo'), B.wa('Pedir por WhatsApp', 'Hola, quiero hacer un pedido')] }; } },
+    { re: /\b(cotizar|cotizacion|presupuesto para|cotizame)\b/, r: function () { return { respuesta: 'Puedes armar tu cotización en la sección Cotizar o pedírsela directamente al asesor por WhatsApp.', botones: [B.sec('Ir a Cotizar', 'cotizar'), B.wa('Cotizar por WhatsApp', 'Hola, quiero una cotización')] }; } },
+    { re: /\b(lista de precios|catalogo en pdf|pdf|catalogo completo|todos los productos|que venden|que productos|que tienen|que manejan)\b/, r: function () { return { respuesta: 'Manejamos ' + productos().length + ' referencias: cargadores y cables, audífonos y parlantes, power banks y multitomas, smartwatch, accesorios, computación, y repuestos (pantallas y baterías). Dime qué buscas y te muestro opciones con precio.', botones: [B.sec('Ver catálogo', 'catalogo'), B.sec('Lista de precios', 'lista-precios')] }; } },
+    { re: /\b(original(es)?|replica(s)?|generico(s)?|copia|imitacion|1\.?1|aaa|son buenos|calidad)\b/, noProducto: true, r: function () { return { respuesta: 'En el catálogo cada producto dice su tipo: "Original" es de la marca (Apple, Samsung, Xiaomi…), "Réplica 1.1" es una réplica de alta calidad, y el resto son marcas de accesorios como 1Hora, Movisun, LDNIO, Alitech o Speed Song. Dime qué buscas y te muestro las dos opciones con precio.', botones: [B.sec('Ver catálogo', 'catalogo')] }; } },
+    { re: /\b(curso|cursos|clase|clases|academia|academy|aprender|estudiar|capacitacion|inscripcion|inscribirme|matricula)\b/, r: function (q) {
+        if (/software/.test(q)) return { respuesta: 'Curso de Software Básico: $800.000 (antes $1.000.000), 5 clases seguidas de lunes a viernes.', botones: [B.sec('Ver cursos', 'cursos'), B.wa('Inscribirme', 'Hola, quiero inscribirme al curso de Software Básico')] };
+        if (/tecnico|reparacion|reparar|celulares|hardware|soldadura|reballing/.test(q)) return { respuesta: 'Curso de Servicio Técnico básico-intermedio: $1.000.000, 4 clases (tú eliges viernes, sábados o domingos a lo largo del mes) y se puede pagar en cuotas. Ves desarme y armado, reconocimiento de piezas, protocolos de encendido, carga, imagen y radiofrecuencia, soldadura (reballing), pines de carga y diagnóstico paso a paso.', botones: [B.sec('Ver cursos', 'cursos'), B.wa('Inscribirme', 'Hola, quiero inscribirme al curso de Servicio Técnico')] };
+        return { respuesta: 'Tenemos dos cursos presenciales: Servicio Técnico básico-intermedio ($1.000.000, 4 clases, se puede pagar en cuotas) y Software Básico ($800.000, 5 clases de lunes a viernes).', botones: [B.sec('Ver cursos', 'cursos'), B.wa('Pedir información', 'Hola, quiero información de los cursos')] };
+      } },
+    { re: /\b(reparan|reparacion|arreglan|arreglar|servicio tecnico|cambian (la )?pantalla|instalan|instalacion|mano de obra|revisan)\b/, noProducto: true, r: function () { return { respuesta: 'Vendemos repuestos (pantallas y baterías) en la Línea técnica. Para instalación o reparación del equipo, pregúntale al asesor por WhatsApp si hay disponibilidad y el valor.', botones: [B.sec('Ver Línea técnica', 'linea-tecnica'), B.wa('Preguntar por reparación', 'Hola, quiero saber si reparan mi celular')] }; } },
+    { re: /\b(descuento|descuentos|promocion|promociones|oferta|ofertas|rebaja|cupon)\b/, r: function () { return { respuesta: 'Las promociones vigentes y los descuentos por cantidad te los confirma el asesor por WhatsApp.', botones: [B.wa('Preguntar por ofertas', 'Hola, ¿qué promociones tienen?'), B.sec('Ver catálogo', 'catalogo')] }; } },
+    { re: /\b(factura|facturacion|factura electronica|rut|nit)\b/, r: function () { return { respuesta: 'Para factura con tus datos o los de tu empresa, pídesela al asesor al confirmar el pedido por WhatsApp.', botones: [B.wa('Pedir factura', 'Hola, necesito factura para mi compra')] }; } },
+    { re: /\b(trabajo|empleo|vacante|hoja de vida|trabajar con ustedes)\b/, r: function () { return { respuesta: 'Para hojas de vida o vacantes, escríbenos por WhatsApp y te indicamos a quién enviarla.', botones: [B.wa('Escribir por WhatsApp', 'Hola, quiero enviar mi hoja de vida')] }; } },
+    { re: /\b(quien eres|que eres|eres (un )?(robot|bot|ia|humano)|como te llamas)\b/, r: function () { return { respuesta: 'Soy el asesor automático de Electro Futuro: busco en el catálogo de la tienda y te respondo sobre productos, precios, envíos, pagos y cursos. Para cerrar tu pedido te atiende una persona por WhatsApp.', botones: [B.wa('Hablar con una persona', 'Hola, quiero hablar con un asesor')] }; } },
+    { re: /\b(agotado|agotados|stock|disponibilidad|hay existencias|tienen en existencia|cuantas unidades|unidades)\b/, noProducto: true, r: function () { return { respuesta: 'En el catálogo los productos sin existencias aparecen como "Agotado". Para confirmar unidades exactas o reservar, escríbele al asesor.', botones: [B.wa('Confirmar disponibilidad', 'Hola, quiero confirmar disponibilidad de un producto'), B.sec('Ver catálogo', 'catalogo')] }; } }
+  ];
+
+  /* ===== Motor ===== */
+  var ORD = ['primero', 'segundo', 'tercero', 'cuarto'];
+  function responder(original) {
+    var q = limpiar(original);
+    var ctx = estado.ctx || {};
+
+    // Detalle de un producto de la respuesta anterior: "el primero", "el 2", "ese"
+    var m = q.match(/\b(el|la|del|de la)? ?(primer[oa]?|segund[oa]|tercer[oa]?|cuart[oa]|ultim[oa]|1|2|3|4)\b/);
+    if (ctx.ultimos && ctx.ultimos.length && m && q.split(' ').length <= 6 && !/\d{2,}/.test(q)) {
+      var i = { primer: 0, primero: 0, primera: 0, '1': 0, segundo: 1, segunda: 1, '2': 1, tercer: 2, tercero: 2, tercera: 2, '3': 2, cuarto: 3, cuarta: 3, '4': 3 }[m[2]];
+      if (/ultim/.test(m[2])) i = ctx.ultimos.length - 1;
+      var pp = porSku(ctx.ultimos[i]); if (pp) return ficha(pp);
+    }
+    if (ctx.ultimos && ctx.ultimos.length === 1 && /\b(ese|esa|eso|caracteristicas|especificaciones|specs|detalles|que trae|como es|compatible|sirve para|mas info|informacion)\b/.test(q) && q.split(' ').length <= 7) {
+      var p1 = porSku(ctx.ultimos[0]); if (p1) return ficha(p1);
+    }
+
+    var tipo = null;
+    var preguntaPrecio = /\b(cuanto (vale|cuesta|valen|cuestan|sale)|que precio|precio)\b/.test(q);
+    for (var t = 0; t < TIPOS.length; t++) if (TIPOS[t].re.test(q)) { tipo = TIPOS[t]; break; }
+    var palabrasProducto = tipo || /\b\d+ ?(w|mah|m|gb)\b/.test(q);
+    var refina = /^(y|o|de|del|para|con|pero|en|que sea|mejor)\b|\b(barat|economic|car[oa]|mas|menos|hasta|entre|desde|original|replica|\d+ ?(w|mah|m)\b|color|negro|blanco|rosad|azul|otr[oa]s?)/.test(q);
+
+    for (var f = 0; f < FAQ.length; f++) {
+      var fq = FAQ[f];
+      if (!fq.re.test(q)) continue;
+      if (fq.soloCorto && q.split(' ').length > 5) continue;
+      if (fq.noProducto && (palabrasProducto || (ctx.tipo && refina && q.split(' ').length <= 5))) continue;
+      if (tipo && /\b(cuanto (vale|cuesta)|precio|tienen|hay|venden)\b/.test(q) && !/envio|pago|curso|garantia|mayor/.test(q)) break;
+      estado.ctx = { tipo: ctx.tipo, terminos: ctx.terminos, ultimos: ctx.ultimos };
+      return fq.r(q);
+    }
+
+    // Categoría general ("accesorios", "computación")
+    var catGeneral = null;
+    if (!tipo) CATS.forEach(function (c) { if (new RegExp('\\b' + c[0] + '\\b').test(q)) catGeneral = c[1]; });
+
+    // Seguimiento: "y más barato?", "de 20w", "samsung?" sobre el tipo anterior
+    var seguimiento = false;
+    if (!tipo && !catGeneral && ctx.tipo && refina && q.split(' ').length <= 7) { tipo = TIPOS.filter(function (x) { return x.k === ctx.tipo; })[0] || null; seguimiento = !!tipo; }
+
+    // Presupuesto
+    var max = null, min = null;
+    var mm = q.match(/\b(menos de|hasta|maximo|no mas de|por debajo de|max|tope|que no pase de|que no supere)\s*\$?\s*(\d+(?:[.,]\d+)?)\s*(mil|k|lucas|barras)?/);
+    if (mm) max = aPesos(mm[2], mm[3]);
+    var mn = q.match(/\b(mas de|desde|minimo|por encima de)\s*\$?\s*(\d+(?:[.,]\d+)?)\s*(mil|k|lucas|barras)?/);
+    if (mn) min = aPesos(mn[2], mn[3]);
+    if (max == null && min == null) { var dm = q.match(/\b(de|como de|unos|por|a)\s*\$?\s*(\d+(?:[.,]\d+)?)\s*(mil|k|lucas|barras|pesos)\b/); if (dm && (dm[3] !== 'pesos' || +dm[2] >= 1000)) max = aPesos(dm[2], dm[3] === 'pesos' ? null : dm[3]); }
+    var entre = q.match(/\bentre\s*\$?\s*(\d+)\s*(mil|k)?\s*y\s*\$?\s*(\d+)\s*(mil|k)?/);
+    if (entre) { min = aPesos(entre[1], entre[2] || entre[4]); max = aPesos(entre[3], entre[4]); }
+    var barato = /\b(barat[oa]s?|economic[oa]s?|mas bajo|menor precio|bajo costo|sencill[oa])\b/.test(q);
+    var caro = /\b(mas car[oa]|premium|gama alta|el mejor|la mejor|mejor calidad|top)\b/.test(q);
+
+    // Términos de búsqueda
+    var quitar = tipo ? q.replace(tipo.re, ' ') : q;
+    if (catGeneral) quitar = quitar.replace(new RegExp(norm(catGeneral)), ' ');
+    quitar = quitar.replace(/\b(menos de|hasta|maximo|no mas de|por debajo de|mas de|desde|minimo|entre|de|como de|unos|por|a)\s*\$?\s*\d+(?:[.,]\d+)?\s*(mil|k|lucas|barras|pesos)\b/g, ' ').replace(/\b(menos de|hasta|maximo|no mas de|por debajo de|mas de|desde|minimo|entre)\s*\$?\s*\d+(?:[.,]\d+)?/g, ' ').replace(/\by\s*\$?\s*\d+\s*(mil|k)?/g, ' ');
+    var terminos = quitar.split(/[^a-z0-9]+/).filter(function (w) { return w && (w.length > 1 || /\d/.test(w)) && VACIAS.indexOf(w) < 0; });
+    // unir números con unidades: "20 w" -> "20w"
+    var tx = []; for (var k = 0; k < terminos.length; k++) { if (/^\d+$/.test(terminos[k]) && /^(w|mah|m|gb|mm|cm)$/.test(terminos[k + 1] || '')) { tx.push(terminos[k] + terminos[k + 1]); k++; } else tx.push(terminos[k]); }
+    terminos = tx.filter(function (w) { return !/^(w|mah|m|gb|mm|cm)$/.test(w); });
+
+    if (seguimiento && ctx.terminos) ctx.terminos.forEach(function (w) { if (terminos.indexOf(w) < 0) terminos.push(w); });
+    if (!tipo && !catGeneral && !terminos.length && max == null && min == null) {
+      if (preguntaPrecio && ctx.ultimos && ctx.ultimos.length === 1) { var pu = porSku(ctx.ultimos[0]); if (pu) return ficha(pu); }
+      if (preguntaPrecio || barato || caro) return { respuesta: '¿De qué producto quieres saber? Escríbeme el nombre o lo que buscas, por ejemplo: "precio cargador 20W" o "audífonos baratos".', botones: [B.sec('Ver catálogo', 'catalogo'), B.sec('Lista de precios', 'lista-precios')] };
+      return noEntendi();
+    }
+    var base = productos();
+    if (tipo) base = base.filter(tipo.f);
+    else if (catGeneral) base = base.filter(function (p) { return p.categoria === catGeneral; });
+
+    function puntuar(lista) {
+      return lista.map(function (p) {
+        var nom = nombreProd(p), todo = textoProd(p), s = 0, ok = 0;
+        terminos.forEach(function (w) {
+          var vars = EXPANDE[w] || [w];
+          var enNom = vars.some(function (v) { return contiene(nom, v); });
+          var enTodo = enNom || vars.some(function (v) { return contiene(todo, v); });
+          if (/^\d+(w|mah|m|gb|mm|cm|v|a)$/.test(w)) { // 20w, 20000mah
+            var num = w.match(/^\d+/)[0], uni = w.replace(/^\d+/, '');
+            var re = new RegExp('(^|[^0-9.,])' + num + ' ?' + uni + '\\b');
+            if (re.test(nom)) { s += 5; ok++; } else if (re.test(todo)) { s += 3; ok++; }
+            return;
+          }
+          if (enNom) { s += 3; ok++; } else if (enTodo) { s += 1; ok++; }
+        });
+        return { p: p, s: s, ok: ok };
       });
+    }
+
+    var res;
+    if (terminos.length) {
+      res = puntuar(base).filter(function (x) { return x.ok >= Math.max(1, Math.ceil(terminos.length * 0.6)); });
+      if (!res.length && (tipo || catGeneral)) {
+        // Término que no aparece (p. ej. "cargador azul"): mostrar el tipo igual
+        res = base.map(function (p) { return { p: p, s: 0, ok: 0 }; });
+      }
+      if (!res.length && !tipo) res = puntuar(productos()).filter(function (x) { return x.ok >= Math.max(1, Math.ceil(terminos.length * 0.6)); });
+    } else if (tipo || catGeneral) {
+      res = base.map(function (p) { return { p: p, s: 0, ok: 0 }; });
+    } else res = [];
+
+    if (max != null) res = res.filter(function (x) { return x.p.precio != null && x.p.precio <= max; });
+    if (min != null) res = res.filter(function (x) { return x.p.precio != null && x.p.precio >= min; });
+
+    if (!res.length) {
+      if (tipo || catGeneral || terminos.length) {
+        estado.ctx = { tipo: tipo ? tipo.k : null };
+        var que = tipo ? tipo.etq : 'eso';
+        return { respuesta: 'No encontré ' + que + (max ? ' por menos de ' + pesos(max) : '') + ' con esas características en el catálogo en línea. Puede que el asesor lo tenga en bodega o te consiga algo parecido.', botones: [B.wa('Preguntar por WhatsApp', 'Hola, busco: ' + original)].concat(tipo ? [B.sec('Ver catálogo', 'catalogo')] : []) };
+      }
+      return noEntendi();
+    }
+
+    res.sort(function (a, b) {
+      if (b.s !== a.s) return b.s - a.s;
+      if (a.p.agotado !== b.p.agotado) return a.p.agotado ? 1 : -1;
+      if (caro) return (b.p.precio || 0) - (a.p.precio || 0);
+      return (a.p.precio || 9e9) - (b.p.precio || 9e9);
+    });
+    if (barato || caro || max != null) {
+      var mejor = res[0].s;
+      var top = res.filter(function (x) { return x.s === mejor && !x.p.agotado; });
+      if (top.length) res = top.concat(res.filter(function (x) { return top.indexOf(x) < 0; }));
+    }
+    if (!terminos.length && !barato && !caro && max == null && min == null) {
+      var porSub = {}, orden = [];
+      res.forEach(function (x) { var k = x.p.subcategoria; if (!porSub[k]) { porSub[k] = []; orden.push(k); } porSub[k].push(x); });
+      if (orden.length > 1) { var mezcla = []; for (var r = 0; mezcla.length < res.length; r++) orden.forEach(function (k) { if (porSub[k][r]) mezcla.push(porSub[k][r]); }); res = mezcla; }
+    }
+    var disponibles = res.filter(function (x) { return !x.p.agotado; });
+    var mostrar = (disponibles.length ? disponibles : res).slice(0, 4);
+    estado.ctx = { tipo: tipo ? tipo.k : null, terminos: terminos, ultimos: mostrar.map(function (x) { return x.p.sku; }) };
+
+    // Un solo resultado claro: ficha completa
+    if (mostrar.length === 1 || (terminos.length && res.length > 1 && res[0].s >= res[1].s + 4)) return ficha(mostrar[0].p);
+
+    var total = res.length, precios = res.filter(function (x) { return x.p.precio; }).map(function (x) { return x.p.precio; });
+    var desde = precios.length ? Math.min.apply(null, precios) : null;
+    var titulo;
+    if (barato) titulo = 'Las opciones más económicas' + (tipo ? ' de ' + tipo.etq : '') + ':';
+    else if (caro) titulo = 'Las opciones de gama más alta' + (tipo ? ' en ' + tipo.etq : '') + ':';
+    else if (total > 4) titulo = 'Tengo ' + total + ' opciones' + (tipo ? ' de ' + tipo.etq : '') + (desde ? ', desde ' + pesos(desde) : '') + (max ? ' hasta ' + pesos(max) : '') + '. Estas son las que más se ajustan:';
+    else titulo = 'Esto es lo que tengo' + (max ? ' por menos de ' + pesos(max) : '') + ':';
+
+    var lineas = mostrar.map(function (x, n) { return (n + 1) + '. ' + x.p.nombre + ' — ' + pesos(x.p.precio) + (x.p.agotado ? ' (agotado)' : ''); }).join('\n');
+    var pie = total > 4 ? '\n\nPuedes afinar: "más barato", "de 20W", "para iPhone", "menos de 50 mil"… o escribe "el 1" para ver detalles.' : '\n\nEscribe "el 1", "el 2"… para ver detalles.';
+    var botones = mostrar.slice(0, 3).map(function (x) { return B.prod(x.p); });
+    if (total > 4) botones.push(tipo || catGeneral ? B.cat('Ver todos', tipo ? mostrar[0].p.categoria : catGeneral) : B.sec('Ver catálogo', 'catalogo'));
+    else botones.push(B.wa('Pedir por WhatsApp', 'Hola, me interesa: ' + mostrar[0].p.nombre));
+    return { respuesta: titulo + '\n' + lineas + pie, botones: botones };
   }
 
-  // Respaldo sin IA: busca en el catálogo cargado en la página.
-  var VACIAS = ['de','la','el','los','las','un','una','para','con','por','que','cual','cuanto','vale','cuesta','precio','tienen','tiene','hay','me','mi','quiero','necesito','busco','y','o','en','del','al','es','sirve','algun','alguna','valor'];
-  function respuestaLocal(texto) {
-    var q = norm(texto);
-    if (/curso|clase|academ|aprender/.test(q)) return { encontrado: true, respuesta: 'Tenemos el Curso de Servicio Técnico básico-intermedio ($1.000.000, 4 clases, se puede pagar en cuotas) y el Curso de Software Básico ($800.000, 5 clases de lunes a viernes).', botones: [{ texto: 'Ver cursos', accion: 'seccion', valor: 'cursos' }, { texto: 'Inscribirme por WhatsApp', accion: 'whatsapp', valor: 'Hola, quiero información de los cursos' }] };
-    if (/donde|direcc|ubica|horario|abren|local/.test(q)) return { encontrado: true, respuesta: 'Estamos en la Cra. 6 #18-49, Local 3, Edificio Belvedere, Ibagué. Atendemos de lunes a viernes de 8 a. m. a 6 p. m. y sábados de 8 a. m. a 2 p. m.', botones: [{ texto: 'Ver ubicación', accion: 'seccion', valor: 'ubicacion' }, { texto: 'Escribir por WhatsApp', accion: 'whatsapp', valor: 'Hola, tengo una pregunta' }] };
-    var palabras = q.split(/[^a-z0-9.]+/).filter(function (w) { return w.length > 1 && VACIAS.indexOf(w) < 0; });
-    if (!palabras.length) return { encontrado: false, respuesta: 'Cuéntame qué producto buscas y para qué equipo, y te muestro las opciones.', botones: [{ texto: 'Ver catálogo', accion: 'seccion', valor: 'catalogo' }] };
-    var res = productos().map(function (p) {
-      var nom = norm(p.nombre), resto = norm([p.marca, p.categoria, p.subcategoria, (p.tags || []).join(' '), Object.values(p.specs || {}).join(' ')].join(' '));
-      var s = 0; palabras.forEach(function (w) { if (nom.indexOf(w) >= 0) s += 3; else if (resto.indexOf(w) >= 0) s += 1; });
-      if (p.agotado) s -= 0.5;
-      return { p: p, s: s };
-    }).filter(function (x) { return x.s >= Math.max(2, palabras.length); }).sort(function (a, b) { return b.s - a.s; }).slice(0, 4);
-    if (!res.length) return { encontrado: false, respuesta: 'No encontré esa referencia en el catálogo en línea. Un asesor te confirma disponibilidad por WhatsApp.', botones: [{ texto: 'Preguntar por WhatsApp', accion: 'whatsapp', valor: 'Hola, busco: ' + texto }, { texto: 'Ver catálogo', accion: 'seccion', valor: 'catalogo' }] };
-    var lista = res.map(function (x) { return x.p.nombre + ' — ' + pesos(x.p.precio) + (x.p.agotado ? ' (agotado)' : ''); }).join('\n');
-    return { encontrado: true, respuesta: 'Esto es lo que tengo en catálogo:\n' + lista, botones: res.slice(0, 3).map(function (x) { var ref = (x.p.specs && x.p.specs.Referencia) || x.p.nombre.split('(')[0].trim().slice(0, 24); return { texto: 'Ver ' + x.p.marca + ' ' + ref, accion: 'producto', valor: x.p.sku }; }).concat([{ texto: 'Pedir por WhatsApp', accion: 'whatsapp', valor: 'Hola, me interesa: ' + res[0].p.nombre }]) };
+  function ficha(p) {
+    estado.ctx = estado.ctx || {}; estado.ctx.ultimos = [p.sku];
+    var s = p.specs || {};
+    var det = Object.keys(s).filter(function (k) { return k !== 'Garantía'; }).slice(0, 6).map(function (k) { return '• ' + k + ': ' + s[k]; }).join('\n');
+    var txt = p.nombre + '\n' + (p.marca && p.marca !== 'Mecánico' ? 'Marca: ' + p.marca + '\n' : '') + 'Precio: ' + pesos(p.precio) + (p.agotado ? ' — AGOTADO por ahora' : '') + (det ? '\n' + det : '');
+    if (p.agotado) {
+      var alt = productos().filter(function (x) { return !x.agotado && x.subcategoria === p.subcategoria && x.sku !== p.sku; })
+        .sort(function (a, b) { return Math.abs((a.precio || 0) - (p.precio || 0)) - Math.abs((b.precio || 0) - (p.precio || 0)); })[0];
+      if (alt) { txt += '\n\nUna alternativa disponible: ' + alt.nombre + ' — ' + pesos(alt.precio) + '.'; return { respuesta: txt, botones: [B.prod(alt), B.wa('Preguntar cuándo llega', 'Hola, ¿cuándo llega ' + p.nombre + '?')] }; }
+    }
+    return { respuesta: txt, botones: [B.prod(p), B.wa('Pedir este producto', 'Hola, quiero: ' + p.nombre + ' (' + pesos(p.precio) + ')')] };
   }
+
+  function noEntendi() {
+    return { respuesta: 'No te entendí bien. Puedes preguntarme, por ejemplo: "cargador para iPhone", "audífonos bluetooth baratos", "power bank de 20000", "pantalla Redmi 13C", "smartwatch para niños", "¿hacen envíos?" o "¿cuánto vale el curso?".', botones: [B.sec('Ver catálogo', 'catalogo'), B.wa('Hablar con un asesor', 'Hola, tengo una pregunta')] };
+  }
+  function aPesos(n, unidad) { var v = parseFloat(String(n).replace(',', '.')); if (unidad || v < 1000) v = v * 1000; return Math.round(v); }
+  function contiene(txt, v) { return (' ' + txt + ' ').indexOf(' ' + v) >= 0 || (v.length >= 4 && txt.indexOf(v) >= 0); }
+
 
   /* ---------- Acciones de los botones ---------- */
   function ejecutar(b) {
     if (b.accion === 'whatsapp') { window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(b.valor), '_blank', 'noopener'); return; }
+    if (b.accion === 'url') { window.location.href = b.valor; return; }
     if (window.innerWidth <= 560) cerrar();
     if (b.accion === 'seccion') return irSeccion(b.valor);
     if (b.accion === 'producto') return abrirProducto(b.valor);
