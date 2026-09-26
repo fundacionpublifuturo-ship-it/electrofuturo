@@ -1,0 +1,662 @@
+[
+ {
+  "cliente": "ALEJANDRA ARMENIA",
+  "factura": "PS2273",
+  "remision": "2026-07-07",
+  "cancelacion": "2026-08-06",
+  "total": 2239000,
+  "abono": 0,
+  "saldo": 2239000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ALEJANDRO LONDOÑO",
+  "factura": "PS1287",
+  "remision": "2026-04-24",
+  "cancelacion": "2026-05-24",
+  "total": 840000,
+  "abono": 630000,
+  "saldo": 1382000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ALEJANDRO LONDOÑO",
+  "factura": "PS2651",
+  "remision": "2026-08-13",
+  "cancelacion": "2026-09-13",
+  "total": 1172000,
+  "abono": 0,
+  "saldo": 1172000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ALEJO DUQUE",
+  "factura": "PS2499",
+  "remision": "2026-07-30",
+  "cancelacion": "2026-08-30",
+  "total": 4494300,
+  "abono": 0,
+  "saldo": 4494300,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ALEXANDER CARTAGO",
+  "factura": "PS749",
+  "remision": "2026-03-12",
+  "cancelacion": "2026-04-12",
+  "total": 2739000,
+  "abono": 1729500,
+  "saldo": 1009500,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ANDRES PALMIRA",
+  "factura": "PS2400",
+  "remision": "2026-07-18",
+  "cancelacion": "2026-08-18",
+  "total": 3059000,
+  "abono": 0,
+  "saldo": 3059000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ANDRES TORRES BUENAVENTURA",
+  "factura": "PS2451",
+  "remision": "2026-07-23",
+  "cancelacion": "2026-08-23",
+  "total": 3512000,
+  "abono": 0,
+  "saldo": 3512000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "CAMILO ESTACION",
+  "factura": "PS812",
+  "remision": "2026-03-17",
+  "cancelacion": "",
+  "total": 9325500,
+  "abono": 5861400,
+  "saldo": 6548100,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "CAMILO  ESTACION",
+  "factura": "PS2563",
+  "remision": "2026-08-05",
+  "cancelacion": "2026-09-05",
+  "total": 3084000,
+  "abono": 0,
+  "saldo": 3084000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "CAMILO NEIVA",
+  "factura": "PS1347",
+  "remision": "2026-04-29",
+  "cancelacion": "2026-05-29",
+  "total": 4879000,
+  "abono": 2000000,
+  "saldo": 2879000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "DAVID NEIVA",
+  "factura": "PS2512",
+  "remision": "2026-07-31",
+  "cancelacion": "2026-08-31",
+  "total": 1631100,
+  "abono": 0,
+  "saldo": 1631100,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "DAVID NEIVA",
+  "factura": "PS2678",
+  "remision": "2026-08-15",
+  "cancelacion": "2026-09-15",
+  "total": 317000,
+  "abono": 0,
+  "saldo": 317000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "EDUARDO FUSA",
+  "factura": "PS2524",
+  "remision": "2026-08-01",
+  "cancelacion": "2026-09-01",
+  "total": 1177400,
+  "abono": 0,
+  "saldo": 1177400,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "EDUARDO FUSA",
+  "factura": "PS2677",
+  "remision": "2026-08-15",
+  "cancelacion": "2026-09-15",
+  "total": 418000,
+  "abono": 0,
+  "saldo": 418000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "EDWIN ESPINAL",
+  "factura": "PS2320",
+  "remision": "2026-07-10",
+  "cancelacion": "2026-08-10",
+  "total": 4035000,
+  "abono": 0,
+  "saldo": 4035000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ERICK NEIVA",
+  "factura": "PS1945",
+  "remision": "2026-06-11",
+  "cancelacion": "2026-07-11",
+  "total": 4744800,
+  "abono": 1285000,
+  "saldo": 3459800,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ERICK NEIVA",
+  "factura": "PS2536",
+  "remision": "2026-08-03",
+  "cancelacion": "2026-09-03",
+  "total": 740000,
+  "abono": 0,
+  "saldo": 740000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ERICK NEIVA",
+  "factura": "PS2654",
+  "remision": "2026-08-13",
+  "cancelacion": "2026-09-13",
+  "total": 411000,
+  "abono": 0,
+  "saldo": 411000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "FERNANDO GUAMO",
+  "factura": "PS626",
+  "remision": "2026-03-04",
+  "cancelacion": "2026-04-04",
+  "total": 1741700,
+  "abono": 1000000,
+  "saldo": 741700,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "FRANCISCO BUENAVENTURA",
+  "factura": "PS1445",
+  "remision": "2026-05-05",
+  "cancelacion": "2026-06-05",
+  "total": 8307000,
+  "abono": 3500000,
+  "saldo": 4807000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "GERARDO IBAGUE",
+  "factura": "PS2177",
+  "remision": "2026-07-01",
+  "cancelacion": "2026-08-01",
+  "total": 1825000,
+  "abono": 0,
+  "saldo": 1825000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "GLADIS BUENAVENTURA",
+  "factura": "PS1875",
+  "remision": "2026-06-05",
+  "cancelacion": "2026-07-05",
+  "total": 8974800,
+  "abono": 0,
+  "saldo": 8974800,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "HERIBERTO NEIVA",
+  "factura": "PS2200",
+  "remision": "2026-07-02",
+  "cancelacion": "2026-08-02",
+  "total": 3031000,
+  "abono": 0,
+  "saldo": 3031000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "HERIBERTO NEIVA",
+  "factura": "PS2295",
+  "remision": "2026-07-08",
+  "cancelacion": "2026-08-08",
+  "total": 656000,
+  "abono": 0,
+  "saldo": 656000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "HERIBERTO NEIVA",
+  "factura": "PS2652",
+  "remision": "2026-08-13",
+  "cancelacion": "2026-09-13",
+  "total": 324000,
+  "abono": 0,
+  "saldo": 324000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "IGNACIO DOS QUEBRADAS",
+  "factura": "PS2032",
+  "remision": "2026-06-18",
+  "cancelacion": "2026-07-18",
+  "total": 105000,
+  "abono": 0,
+  "saldo": 105000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "JEAN CARLOS ORTEGA",
+  "factura": "PS1923",
+  "remision": "2026-06-10",
+  "cancelacion": "2026-07-10",
+  "total": 6723000,
+  "abono": 0,
+  "saldo": 6723000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "JHON FLAMINGO",
+  "factura": "PS2191",
+  "remision": "2026-07-02",
+  "cancelacion": "2026-08-02",
+  "total": 879200,
+  "abono": 500000,
+  "saldo": 379200,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "JONATAN REPACION NEIVA",
+  "factura": "PS549",
+  "remision": "2026-02-26",
+  "cancelacion": "2026-03-26",
+  "total": 3476000,
+  "abono": 3080000,
+  "saldo": 1182600,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "JONATAN REPACION NEIVA",
+  "factura": "PS1029",
+  "remision": "2026-04-08",
+  "cancelacion": "2026-05-08",
+  "total": 786600,
+  "abono": 0,
+  "saldo": 786600,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "JORGE MASTER",
+  "factura": "PS9",
+  "remision": "2026-01-13",
+  "cancelacion": "",
+  "total": 2064000,
+  "abono": 0,
+  "saldo": 2064000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "JORGE OLIVEROS NEIVA",
+  "factura": "PS1402",
+  "remision": "2026-05-02",
+  "cancelacion": "2026-06-02",
+  "total": 10075725,
+  "abono": 3500000,
+  "saldo": 6575725,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "JUAN ESTEBAN PERIILA",
+  "factura": "PS1785",
+  "remision": "2026-05-28",
+  "cancelacion": "2026-06-28",
+  "total": 987000,
+  "abono": 500000,
+  "saldo": 487000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "JUAN LA UNION",
+  "factura": "PS1676",
+  "remision": "2026-05-21",
+  "cancelacion": "2026-06-21",
+  "total": 3313300,
+  "abono": 2000000,
+  "saldo": 1313300,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "JUANITA ORTIZ",
+  "factura": "PS772",
+  "remision": "2026-03-13",
+  "cancelacion": "",
+  "total": 837200,
+  "abono": 0,
+  "saldo": 837200,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "JUANITA ORTIZ",
+  "factura": "PS1038",
+  "remision": "2026-04-11",
+  "cancelacion": "",
+  "total": 655000,
+  "abono": 0,
+  "saldo": 655000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "KEVIN IBAGUE",
+  "factura": "PS2510",
+  "remision": "2026-07-31",
+  "cancelacion": "2026-08-31",
+  "total": 1138400,
+  "abono": 700000,
+  "saldo": 438400,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "LAIN CARTAGO",
+  "factura": "PS1730",
+  "remision": "2026-05-25",
+  "cancelacion": "2026-06-25",
+  "total": 3740000,
+  "abono": 1900000,
+  "saldo": 2386000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "LAIN CARTAGO",
+  "factura": "PS1797",
+  "remision": "2026-05-29",
+  "cancelacion": "2026-06-29",
+  "total": 546000,
+  "abono": 0,
+  "saldo": 546000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "LEONARDO MANIZALEZ",
+  "factura": "PS2138",
+  "remision": "2026-06-27",
+  "cancelacion": "2026-07-27",
+  "total": 772500,
+  "abono": 0,
+  "saldo": 772500,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "LUIS CARLOS ARMENIA",
+  "factura": "PS2158",
+  "remision": "2026-06-30",
+  "cancelacion": "2026-07-30",
+  "total": 270000,
+  "abono": 133000,
+  "saldo": 137000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "LUIS CARLOS ARMENIA",
+  "factura": "PS2559",
+  "remision": "2026-08-04",
+  "cancelacion": "2026-09-04",
+  "total": 370800,
+  "abono": 0,
+  "saldo": 370800,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "MARCOS SEVILLA",
+  "factura": "PS1585",
+  "remision": "2026-05-14",
+  "cancelacion": "2026-06-15",
+  "total": 1802500,
+  "abono": 883000,
+  "saldo": 919500,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "MARCOS SEVILLA",
+  "factura": "PS2026",
+  "remision": "2026-06-18",
+  "cancelacion": "2026-07-18",
+  "total": 2847700,
+  "abono": 0,
+  "saldo": 2847700,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "MARIA PAULA",
+  "factura": "PS2523",
+  "remision": "2026-08-01",
+  "cancelacion": "2026-09-01",
+  "total": 3614000,
+  "abono": 0,
+  "saldo": 3614000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "MARTHA GARZON",
+  "factura": "PS2081",
+  "remision": "2026-06-22",
+  "cancelacion": "2026-07-22",
+  "total": 2388500,
+  "abono": 0,
+  "saldo": 2388500,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "MIGUEL LIBANO",
+  "factura": "PS2370",
+  "remision": "2026-07-16",
+  "cancelacion": "2026-08-16",
+  "total": 2459000,
+  "abono": 0,
+  "saldo": 2459000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "MONICA",
+  "factura": "1639",
+  "remision": "27/11/202",
+  "cancelacion": "",
+  "total": 1176000,
+  "abono": 0,
+  "saldo": 1176000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "NANCY NEIVA",
+  "factura": "PS2009",
+  "remision": "2026-06-17",
+  "cancelacion": "2026-07-17",
+  "total": 1683500,
+  "abono": 0,
+  "saldo": 1683500,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "NURY CARMEN",
+  "factura": "PS2076",
+  "remision": "2026-06-22",
+  "cancelacion": "2026-07-22",
+  "total": 1491500,
+  "abono": 1793000,
+  "saldo": 751500,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "NURY CARMEN",
+  "factura": "PS2302",
+  "remision": "2026-07-09",
+  "cancelacion": "2026-08-09",
+  "total": 114000,
+  "abono": 0,
+  "saldo": 114000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "NURY CARMEN",
+  "factura": "PS2324",
+  "remision": "2026-07-14",
+  "cancelacion": "2026-08-14",
+  "total": 939000,
+  "abono": 0,
+  "saldo": 939000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ORLANDO PIMENTEL",
+  "factura": "PS1952",
+  "remision": "2026-06-12",
+  "cancelacion": "2026-07-12",
+  "total": 5880600,
+  "abono": 3580000,
+  "saldo": 7324600,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ORLANDO PIMENTEL",
+  "factura": "PS2122",
+  "remision": "2026-06-25",
+  "cancelacion": "2026-07-25",
+  "total": 1057000,
+  "abono": 0,
+  "saldo": 1057000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ORLANDO PIMENTEL",
+  "factura": "PS2565",
+  "remision": "2026-08-05",
+  "cancelacion": "2026-09-05",
+  "total": 998000,
+  "abono": 0,
+  "saldo": 998000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ORLANDO PIMENTEL",
+  "factura": "PS2621",
+  "remision": "2026-08-11",
+  "cancelacion": "2026-09-11",
+  "total": 2969000,
+  "abono": 0,
+  "saldo": 2969000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "PAOLA NEIVA",
+  "factura": "PS2500",
+  "remision": "2026-07-30",
+  "cancelacion": "2026-08-30",
+  "total": 4660000,
+  "abono": 0,
+  "saldo": 4660000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ROBIN HUILA",
+  "factura": "PS1962",
+  "remision": "2026-06-12",
+  "cancelacion": "2026-07-12",
+  "total": 5945000,
+  "abono": 4124200,
+  "saldo": 11767700,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ROBIN HUILA",
+  "factura": "PS2479",
+  "remision": "2026-07-25",
+  "cancelacion": "2026-08-25",
+  "total": 993000,
+  "abono": 0,
+  "saldo": 993000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "ROBIN HUILA",
+  "factura": "PS2628",
+  "remision": "2026-08-11",
+  "cancelacion": "2026-09-11",
+  "total": 8953900,
+  "abono": 0,
+  "saldo": 8953900,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "SANTIAGO NEIVA",
+  "factura": "PS2560",
+  "remision": "2026-08-04",
+  "cancelacion": "2026-05-05",
+  "total": 1030000,
+  "abono": 0,
+  "saldo": 1030000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "STEVEN CAJAMARCA",
+  "factura": "PS1096",
+  "remision": "2026-04-11",
+  "cancelacion": "",
+  "total": 4449000,
+  "abono": 3350000,
+  "saldo": 1099000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "WALTER SALADO",
+  "factura": "PS1940",
+  "remision": "2026-06-11",
+  "cancelacion": "2026-07-11",
+  "total": 1606500,
+  "abono": 918000,
+  "saldo": 2502500,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "WALTER SALADO",
+  "factura": "PS2259",
+  "remision": "2026-07-06",
+  "cancelacion": "2026-08-06",
+  "total": 1814000,
+  "abono": 0,
+  "saldo": 1814000,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "WILMER NEIVA",
+  "factura": "PS2679",
+  "remision": "2026-08-15",
+  "cancelacion": "2026-09-15",
+  "total": 1907200,
+  "abono": 0,
+  "saldo": 1907200,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ },
+ {
+  "cliente": "YAMILE ARMENIA",
+  "factura": "PS714",
+  "remision": "2026-03-10",
+  "cancelacion": "",
+  "total": 2349500,
+  "abono": 1479000,
+  "saldo": 870500,
+  "origen": "CUADRO_CONSOLIDADO_FER"
+ }
+]
