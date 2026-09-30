@@ -25,8 +25,21 @@
 .ef-tab{display:none}
 .ef-tab.ef-tab--activa{display:block}
 .ef-tab.ef-tab--activa .reveal{opacity:1!important;transform:none!important;transition:none!important}
-.ia-btn{opacity:1!important;pointer-events:auto!important;transform:none!important}
 /* Forzar que el botón del asesor siempre se vea */
+
+/* Chips circulares de categoría */
+.cats-chips{display:flex;gap:14px;padding:24px 0 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.cats-chips::-webkit-scrollbar{display:none}
+.cats-chip{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;min-width:72px;padding:10px 8px;border:1.5px solid var(--linea,#e5e7eb);border-radius:16px;background:#fff;transition:.25s ease;flex:0 0 auto;text-align:center}
+.cats-chip:hover{border-color:var(--cian,#19C1D6);transform:translateY(-2px)}
+.cats-chip.activo{background:var(--cian,#19C1D6);border-color:var(--cian,#19C1D6);color:#fff;box-shadow:0 4px 16px rgba(25,193,214,.3)}
+.cats-chip .cc-ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:rgba(25,193,214,.08);color:var(--cian-hondo,#0E93A5);transition:.25s}
+.cats-chip.activo .cc-ic{background:rgba(255,255,255,.2);color:#fff}
+.cats-chip .cc-nombre{font-size:.72rem;font-weight:600;line-height:1.2;white-space:nowrap}
+.cats-chip .cc-cuenta{font-size:.62rem;color:var(--gris,#6b7280)}
+.cats-chip.activo .cc-nombre,.cats-chip.activo .cc-cuenta{color:#fff}
+@media(max-width:680px){.cats-chips{gap:10px;padding:16px 0 4px}.cats-chip{min-width:64px;padding:8px 6px}.cats-chip .cc-ic{width:32px;height:32px}}
+
 .ia-btn{opacity:1!important;pointer-events:auto!important;transform:none!important}
 
 </style>
@@ -239,6 +252,11 @@
     </div>
   </div>
 </section>
+
+<!-- CHIPS DE CATEGORÍA -->
+<div class="wrap" style="padding-top:0">
+  <div class="cats-chips" id="cats-chips"></div>
+</div>
 <div class="wrap">
   <div class="catalogo-body">
     <aside class="filtros" id="filtros">
